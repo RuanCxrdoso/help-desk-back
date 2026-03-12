@@ -1,4 +1,8 @@
 export enum ROLE {
   EMPLOYEE = 'EMPLOYEE',
   TECHNICIAN = 'TECHNICIAN',
+  ADMIN = 'ADMIN',
+  // MASTER_ADMIN = 'MASTER_ADMIN',
 }
+
+export type Role = 'EMPLOYEE' | 'TECHNICIAN' | 'ADMIN' // | 'MASTER_ADMIN'
