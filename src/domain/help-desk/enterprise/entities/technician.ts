@@ -1,5 +1,5 @@
 import { Entity } from '@/core/entities/entity'
-import { Role } from '@/core/utils/roles'
+import { ROLE } from '@/core/enums/role'
 import { EmailValueObject } from './value-objects/email-value-object'
 import { Optional } from '@/core/types/optional'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
@@ -9,7 +9,7 @@ export interface TechnicianProps {
   lastName: string
   email: EmailValueObject
   password: string
-  role: Role.TECHNICIAN
+  role: ROLE.TECHNICIAN
   createdAt: Date
   updatedAt?: Date | null
 }
@@ -43,6 +43,28 @@ export class Technician extends Entity<TechnicianProps> {
     return this.props.updatedAt
   }
 
+  set firstName(value: string) {
+    this.props.firstName = value
+
+    this.touch()
+  }
+
+  set lastName(value: string) {
+    this.props.lastName = value
+
+    this.touch()
+  }
+
+  set email(value: EmailValueObject) {
+    this.props.email = value
+
+    this.touch()
+  }
+
+  private touch() {
+    this.props.updatedAt = new Date()
+  }
+
   static create(
     props: Optional<TechnicianProps, 'createdAt' | 'updatedAt' | 'role'>,
     id?: UniqueEntityID,
@@ -51,7 +73,7 @@ export class Technician extends Entity<TechnicianProps> {
       {
         createdAt: props.createdAt ?? new Date(),
         updatedAt: props.updatedAt ?? new Date(),
-        role: Role.TECHNICIAN,
+        role: ROLE.TECHNICIAN,
         ...props,
       },
       id ?? new UniqueEntityID(),
