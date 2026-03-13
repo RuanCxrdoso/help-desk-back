@@ -40,8 +40,8 @@ describe('Register Admin', () => {
       creatorId: superAdmin.id.toString(),
       firstName: 'Steve',
       lastName: 'Adams',
-      password: '123456',
       email: 'steveadams@email.com',
+      password: '123456',
     })
 
     expect(result.isRight()).toBeTruthy()
@@ -91,8 +91,8 @@ describe('Register Admin', () => {
       creatorId: superAdmin.id.toString(),
       firstName: 'Steve',
       lastName: 'Adams',
-      password: '123456',
       email: 'steveadams@email.com',
+      password: '123456',
     })
 
     expect(result.isLeft()).toBeTruthy()

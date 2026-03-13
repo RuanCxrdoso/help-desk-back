@@ -36,19 +36,21 @@ export class RegisterAdminUseCase {
 
     if (!creator) return left(new NotAllowedError())
 
-    const user = await this.adminsRepository.findByEmail(data.email)
+    const adminWithSameEmail = await this.adminsRepository.findByEmail(
+      data.email,
+    )
 
-    if (user) return left(new UserAlreadyExistsError())
+    if (adminWithSameEmail) return left(new UserAlreadyExistsError())
 
     const hashedPassword = await this.hashGenerator.hash(password)
 
-    const userData = {
+    const technicianData = {
       ...data,
       password: hashedPassword,
       email: EmailValueObject.create(data.email),
     }
 
-    const admin = Admin.create(userData)
+    const admin = Admin.create(technicianData)
 
     await this.adminsRepository.create(admin)
 
