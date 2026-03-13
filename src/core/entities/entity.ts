@@ -5,7 +5,7 @@ export abstract class Entity<Props> {
   private _id: UniqueEntityID
 
   get id() {
-    return this._id.toString()
+    return this._id
   }
 
   public equals(entity: Entity<unknown>) {
