@@ -3,7 +3,9 @@
 Abaixo estão todos os requisitos funcionais do sistema, modelados como Use Cases da camada de Aplicação.
 
 ### Fase 1: Autenticação e Gestão de Usuários
-- [ ] `RegisterUserUseCase`: Cadastro de novos usuários (funcionários ou técnicos). **Restrito a Administradores**. Valida e-mail único e realiza o hash da senha inicial.
+- [ ✅ ] `RegisterAdminUseCase`: Cadastro de novos admins. **Restrito a Super Administradores**. Valida e-mail único e realiza o hash da senha inicial.
+- [ ✅ ] `RegisterTechnicianUseCase`: Cadastro de novos técnicos. **Restrito a Administradores**. Valida e-mail único e realiza o hash da senha inicial.
+- [ ✅ ] `RegisterEmployeeUseCase`: Cadastro de novos funcionários. **Restrito a Administradores**. Valida e-mail único e realiza o hash da senha inicial.
 - [ ] `AuthenticateUserUseCase`: Validação de credenciais (e-mail e senha) e geração de JWT (Access Token e Refresh Token).
 - [ ] `GetUserProfileUseCase`: Retorna os dados do usuário logado (essencial para a renderização inicial e controle de rotas no Next.js).
 
