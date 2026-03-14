@@ -32,6 +32,7 @@ export class RegisterAdminUseCase {
     password,
     ...data
   }: RegisterAdminUseCaseRequest): Promise<RegisterAdminUseCaseResponse> {
+    // if(creatorRole !== ROLE.SUPER_ADMIN) return left(new NotAllowedError())
     const creator = await this.superAdminsRepository.findById(creatorId)
 
     if (!creator) return left(new NotAllowedError())
