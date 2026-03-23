@@ -6,6 +6,9 @@ import { UserAlreadyExistsError } from '../errors/user-already-exists-error'
 import { ITechniciansRepository } from '../repositories/technicians-repository'
 import { NotAllowedError } from '../errors/not-allowed-error'
 import { IAdminsRepository } from '../repositories/admins-repository'
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
+import { ITenantsRepository } from '../repositories/tenants-repository'
+import { NotFoundError } from '../errors/not-found-error'
 
 export interface RegisterTechnicianUseCaseRequest {
   creatorId: string
@@ -13,15 +16,17 @@ export interface RegisterTechnicianUseCaseRequest {
   lastName: string
   email: string
   password: string
+  tenantId: string
 }
 
 export type RegisterTechnicianUseCaseResponse = Either<
-  NotAllowedError | UserAlreadyExistsError,
+  NotAllowedError | UserAlreadyExistsError | NotFoundError,
   null
 >
 
 export class RegisterTechnicianUseCase {
   constructor(
+    private tenantsRepository: ITenantsRepository,
     private techniciansRepository: ITechniciansRepository,
     private adminsRepository: IAdminsRepository,
     private hashGenerator: IHashGenerator,
@@ -30,14 +35,20 @@ export class RegisterTechnicianUseCase {
   async execute({
     creatorId,
     password,
+    tenantId,
+    email,
     ...data
   }: RegisterTechnicianUseCaseRequest): Promise<RegisterTechnicianUseCaseResponse> {
-    const creator = await this.adminsRepository.findById(creatorId)
+    const tenant = await this.tenantsRepository.findById(tenantId)
+
+    if (!tenant) return left(new NotFoundError())
+
+    const creator = await this.adminsRepository.findById(creatorId, tenantId)
 
     if (!creator) return left(new NotAllowedError())
 
     const technicianWithSameEmail =
-      await this.techniciansRepository.findByEmail(data.email)
+      await this.techniciansRepository.findByEmail(email, tenantId)
 
     if (technicianWithSameEmail) return left(new UserAlreadyExistsError())
 
@@ -46,7 +57,8 @@ export class RegisterTechnicianUseCase {
     const technicianData = {
       ...data,
       password: hashedPassword,
-      email: EmailValueObject.create(data.email),
+      email: EmailValueObject.create(email),
+      tenantId: new UniqueEntityID(tenantId),
     }
 
     const technician = Technician.create(technicianData)

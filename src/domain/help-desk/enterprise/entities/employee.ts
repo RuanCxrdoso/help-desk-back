@@ -12,6 +12,7 @@ export interface EmployeeProps {
   role: ROLE.EMPLOYEE
   createdAt: Date
   updatedAt?: Date | null
+  tenantId: UniqueEntityID
 }
 
 export class Employee extends Entity<EmployeeProps> {
@@ -41,6 +42,10 @@ export class Employee extends Entity<EmployeeProps> {
 
   get updatedAt() {
     return this.props.updatedAt
+  }
+
+  get tenantId() {
+    return this.props.tenantId
   }
 
   set firstName(value: string) {

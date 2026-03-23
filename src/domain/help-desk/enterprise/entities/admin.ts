@@ -12,6 +12,7 @@ export interface AdminProps {
   role: ROLE.ADMIN
   createdAt: Date
   updatedAt?: Date | null
+  tenantId: UniqueEntityID
 }
 
 export class Admin extends Entity<AdminProps> {
@@ -41,6 +42,10 @@ export class Admin extends Entity<AdminProps> {
 
   get updatedAt() {
     return this.props.updatedAt
+  }
+
+  get tenantId() {
+    return this.props.tenantId.toString()
   }
 
   set firstName(value: string) {

@@ -6,6 +6,9 @@ import { UserAlreadyExistsError } from '../errors/user-already-exists-error'
 import { IEmployeesRepository } from '../repositories/employees-repository'
 import { NotAllowedError } from '../errors/not-allowed-error'
 import { IAdminsRepository } from '../repositories/admins-repository'
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
+import { ITenantsRepository } from '../repositories/tenants-repository'
+import { NotFoundError } from '../errors/not-found-error'
 
 export interface RegisterEmployeeUseCaseRequest {
   creatorId: string
@@ -13,15 +16,17 @@ export interface RegisterEmployeeUseCaseRequest {
   lastName: string
   email: string
   password: string
+  tenantId: string
 }
 
 export type RegisterEmployeeUseCaseResponse = Either<
-  NotAllowedError | UserAlreadyExistsError,
+  NotAllowedError | UserAlreadyExistsError | NotFoundError,
   null
 >
 
 export class RegisterEmployeeUseCase {
   constructor(
+    private tenantsRepository: ITenantsRepository,
     private employeesRepository: IEmployeesRepository,
     private adminsRepository: IAdminsRepository,
     private hashGenerator: IHashGenerator,
@@ -30,14 +35,21 @@ export class RegisterEmployeeUseCase {
   async execute({
     creatorId,
     password,
+    tenantId,
+    email,
     ...data
   }: RegisterEmployeeUseCaseRequest): Promise<RegisterEmployeeUseCaseResponse> {
-    const creator = await this.adminsRepository.findById(creatorId)
+    const tenant = await this.tenantsRepository.findById(tenantId)
+
+    if (!tenant) return left(new NotFoundError())
+
+    const creator = await this.adminsRepository.findById(creatorId, tenantId)
 
     if (!creator) return left(new NotAllowedError())
 
     const employeeWithSameEmail = await this.employeesRepository.findByEmail(
-      data.email,
+      email,
+      tenantId,
     )
 
     if (employeeWithSameEmail) return left(new UserAlreadyExistsError())
@@ -47,7 +59,8 @@ export class RegisterEmployeeUseCase {
     const employeeData = {
       ...data,
       password: hashedPassword,
-      email: EmailValueObject.create(data.email),
+      email: EmailValueObject.create(email),
+      tenantId: new UniqueEntityID(tenantId),
     }
 
     const employee = Employee.create(employeeData)

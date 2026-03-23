@@ -13,6 +13,7 @@ export interface TicketProps {
   priority: TicketPriorityType
   createdAt: Date
   updatedAt?: Date | null
+  tenantId: UniqueEntityID
 }
 
 export class Ticket extends Entity<TicketProps> {
@@ -46,6 +47,10 @@ export class Ticket extends Entity<TicketProps> {
 
   get updatedAt() {
     return this.props.updatedAt
+  }
+
+  get tenantId() {
+    return this.props.tenantId
   }
 
   set title(title: string) {
