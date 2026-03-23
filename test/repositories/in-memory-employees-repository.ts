@@ -8,16 +8,22 @@ export class InMemoryEmployeesRepository implements IEmployeesRepository {
     this.items.push(user)
   }
 
-  async findById(id: string) {
-    const user = this.items.find((item) => item.id.toString() === id)
+  async findById(id: string, tenantId: string) {
+    const user = this.items.find(
+      (item) =>
+        item.id.toString() === id && item.tenantId.toString() === tenantId,
+    )
 
     if (!user) return null
 
     return user
   }
 
-  async findByEmail(email: string) {
-    const user = this.items.find((item) => item.email.value === email)
+  async findByEmail(email: string, tenantId: string) {
+    const user = this.items.find(
+      (item) =>
+        item.email.value === email && item.tenantId.toString() === tenantId,
+    )
 
     if (!user) return null
 
