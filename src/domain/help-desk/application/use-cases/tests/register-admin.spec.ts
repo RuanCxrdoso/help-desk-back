@@ -1,6 +1,6 @@
 import { RegisterAdminUseCase } from '../register-admin'
 import { IHashGenerator } from '../../cryptography/hash-generator'
-import { Hasher } from 'test/cryptography/hasher'
+import { FakeHasher } from 'test/cryptography/fake-hasher'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
 import { InMemoryAdminsRepository } from 'test/repositories/in-memory-admins-repository'
 import { SuperAdmin } from '@/domain/help-desk/enterprise/entities/super-admin'
@@ -21,7 +21,7 @@ let sut: RegisterAdminUseCase
 
 describe('Register Admin', () => {
   beforeEach(() => {
-    hasher = new Hasher()
+    hasher = new FakeHasher()
     tenantsRepository = new InMemoryTenantsRepository()
     adminsRepository = new InMemoryAdminsRepository()
     superAdminsRepository = new InMemorySuperAdminsRepository()

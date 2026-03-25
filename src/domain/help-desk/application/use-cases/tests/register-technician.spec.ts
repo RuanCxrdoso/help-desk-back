@@ -1,5 +1,5 @@
 import { IHashGenerator } from '../../cryptography/hash-generator'
-import { Hasher } from 'test/cryptography/hasher'
+import { FakeHasher } from 'test/cryptography/fake-hasher'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
 import { InMemoryAdminsRepository } from 'test/repositories/in-memory-admins-repository'
 import { NotAllowedError } from '../../errors/not-allowed-error'
@@ -21,7 +21,7 @@ let sut: RegisterTechnicianUseCase
 
 describe('Register Technician', () => {
   beforeEach(() => {
-    hasher = new Hasher()
+    hasher = new FakeHasher()
     tenantsRepository = new InMemoryTenantsRepository()
     adminsRepository = new InMemoryAdminsRepository()
     techniciansRepository = new InMemoryTechniciansRepository()
