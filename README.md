@@ -2,12 +2,14 @@
 
 Abaixo estão todos os requisitos funcionais do sistema, modelados como Use Cases da camada de Aplicação.
 
-### Fase 1: Autenticação e Gestão de Usuários
-- [ ✅ ] `RegisterAdminUseCase`: Cadastro de novos admins. **Restrito a Super Administradores**. Valida e-mail único e realiza o hash da senha inicial.
-- [ ✅ ] `RegisterTechnicianUseCase`: Cadastro de novos técnicos. **Restrito a Administradores**. Valida e-mail único e realiza o hash da senha inicial.
-- [ ✅ ] `RegisterEmployeeUseCase`: Cadastro de novos funcionários. **Restrito a Administradores**. Valida e-mail único e realiza o hash da senha inicial.
-- [ ] `AuthenticateUserUseCase`: Validação de credenciais (e-mail e senha) e geração de JWT (Access Token e Refresh Token).
-- [ ] `GetUserProfileUseCase`: Retorna os dados do usuário logado (essencial para a renderização inicial e controle de rotas no Next.js).
+### Fase 1: Autenticação, Gestão de Usuários e Multi-tenancy
+- [ ✅ ] `RegisterTenantAndAdminUseCase`: Fluxo de *SaaS Onboarding*. Cria uma nova empresa (Tenant) e seu administrador fundador em uma única transação atômica no banco de dados, validando unicidade de *slug* e e-mail global.
+- [ ✅ ] `RegisterAdminUseCase`: Cadastro de administradores adicionais atrelados a um Tenant existente. **Restrito a Super Administradores**. 
+- [ ✅ ] `RegisterTechnicianUseCase`: Cadastro de novos técnicos operacionais atrelados a um Tenant. **Restrito a Administradores**.
+- [ ✅ ] `RegisterEmployeeUseCase`: Cadastro de funcionários (clientes finais) atrelados a um Tenant. **Restrito a Administradores**.
+- [ ✅ ] `AuthenticateSuperAdminUseCase`: Autenticação exclusiva para a plataforma (Host). Requer apenas e-mail e senha, gerando um JWT de administração global (sem `tenantId`).
+- [ ✅ ] `AuthenticateUseCase`: Autenticação de usuários do tenant (Admins, Técnicos e Funcionários). Exige o `tenantSlug` (contexto do Workspace) para isolamento lógico e retorna um JWT contendo o `tenantId`.
+- [ ] `GetUserProfileUseCase`: Retorna os dados do usuário logado baseado no `sub` e `tenantId` do token (essencial para a renderização inicial e controle de rotas no Next.js).
 
 ### Fase 2: Infraestrutura de Arquivos (Storage)
 - [ ] `UploadAndCreateAttachmentUseCase`: Recebe um arquivo via `multipart/form-data`, valida formato/tamanho, faz o upload para o Storage (ex: AWS S3 ou R2) e persiste o registro lógico no banco.
