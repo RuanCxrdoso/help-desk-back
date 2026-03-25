@@ -13,7 +13,6 @@ reviews:
       - "wip"
       - "[skip ci]"
     base_branches:
-      - "main"
       - "developer"
   path_filters:
     - "!**/node_modules/**"
