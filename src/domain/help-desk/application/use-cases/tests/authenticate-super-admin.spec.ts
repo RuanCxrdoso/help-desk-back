@@ -11,7 +11,7 @@ let encrypter: FakeEncrypter
 let sut: AuthenticateSuperAdminUseCase
 
 describe('Authenticate Super Admin', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     superAdminsRepository = new InMemorySuperAdminsRepository()
     hasher = new FakeHasher()
     encrypter = new FakeEncrypter()
