@@ -1,0 +1,8 @@
+export enum ROLE {
+  EMPLOYEE = 'EMPLOYEE',
+  TECHNICIAN = 'TECHNICIAN',
+  ADMIN = 'ADMIN',
+  SUPER_ADMIN = 'SUPER_ADMIN',
+}
+
+export type Role = 'EMPLOYEE' | 'TECHNICIAN' | 'ADMIN' | 'SUPER_ADMIN'
