@@ -1,0 +1,42 @@
+language: "en-US"
+reviews:
+  profile: "chill"
+  high_level_summary: true
+  review_status: true
+  collapse_walkthrough: false
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_title_keywords:
+      - "WIP"
+      - "wip"
+      - "[skip ci]"
+    base_branches:
+      - "developer"
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/.next/**"
+    - "!**/coverage/**"
+    - "!**/*.lock"
+    - "!**/*.min.js"
+  instructions: |
+    Focus on:
+    - Security issues (auth, input validation, exposed secrets, and tenantId isolation leaks).
+    - Unhandled null/undefined values.
+    - Unhandled asynchronous errors (promises, async/await).
+    - Clean Architecture and DDD violations (e.g., Domain or Application layers importing ORMs, Prisma, or web frameworks).
+    
+    Ignore:
+    - Formatting and style (handled by linter/prettier).
+    - Forgotten console.log (handled by linting).
+    - Subjective aesthetic preferences.
+chat:
+  auto_reply: true
+knowledge_base:
+  web_search:
+    enabled: true
+  learnings:
+    scope: auto
