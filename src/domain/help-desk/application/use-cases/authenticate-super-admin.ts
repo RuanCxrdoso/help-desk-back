@@ -2,7 +2,6 @@ import { Either, left, right } from '@/core/error/either'
 import { InvalidCredentialsError } from '../errors/invalid-credentials-error'
 import { IHashComparer } from '../cryptography/hash-comparer'
 import { IEncrypter } from '../cryptography/encrypter'
-import { NotFoundError } from '../errors/not-found-error'
 import { ISuperAdminsRepository } from '../repositories/super-admins-repository'
 
 interface AuthenticateSuperAdminRequest {
@@ -11,7 +10,7 @@ interface AuthenticateSuperAdminRequest {
 }
 
 type AuthenticateSuperAdminResponse = Either<
-  InvalidCredentialsError | NotFoundError,
+  InvalidCredentialsError,
   { accessToken: string }
 >
 
