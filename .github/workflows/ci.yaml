@@ -1,0 +1,42 @@
+name: '[CI] Forum API'
+
+on:
+  push:
+    branches: [developer]
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  build-and-tests:
+    name: Lint, Unit Tests and Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run linter
+        run: pnpm lint:check
+
+      - name: Run formatter
+        run: pnpm format:check
+
+      - name: Run unit tests
+        run: pnpm test:unit
+
+      - name: Run build
+        run: pnpm build
