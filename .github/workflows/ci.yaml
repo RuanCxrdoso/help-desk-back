@@ -1,4 +1,4 @@
-name: '[CI] Forum API'
+name: '[CI] Help Desk API'
 
 on:
   push:
