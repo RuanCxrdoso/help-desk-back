@@ -1,11 +1,15 @@
 import { IEmployeesRepository } from '@/domain/help-desk/application/repositories/employees-repository'
 import { Employee } from '@/domain/help-desk/enterprise/entities/employee'
+import { InMemoryUsersRepository } from './in-memory-users-repository'
 
 export class InMemoryEmployeesRepository implements IEmployeesRepository {
   public items: Employee[] = []
 
+  constructor(private usersRepository: InMemoryUsersRepository) {}
+
   async create(user: Employee) {
     this.items.push(user)
+    this.usersRepository.items.push(user)
   }
 
   async findById(id: string, tenantId: string) {

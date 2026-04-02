@@ -1,8 +1,5 @@
 import { FakeEncrypter } from 'test/cryptography/fake-encrypter'
 import { FakeHasher } from 'test/cryptography/fake-hasher'
-import { InMemoryAdminsRepository } from 'test/repositories/in-memory-admins-repository'
-import { InMemoryEmployeesRepository } from 'test/repositories/in-memory-employees-repository'
-import { InMemoryTechniciansRepository } from 'test/repositories/in-memory-technicians-repository'
 import { InMemoryTenantsRepository } from 'test/repositories/in-memory-tenants-repository'
 import { AuthenticateUseCase } from '../authenticate'
 import { makeTenant } from 'test/factories/make-tenant'
@@ -10,10 +7,9 @@ import { makeTechnician } from 'test/factories/make-technician'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { InvalidCredentialsError } from '../../errors/invalid-credentials-error'
+import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository'
 
-let adminsRepository: InMemoryAdminsRepository
-let techniciansRepository: InMemoryTechniciansRepository
-let employeesRepository: InMemoryEmployeesRepository
+let usersRepository: InMemoryUsersRepository
 let tenantsRepository: InMemoryTenantsRepository
 let fakeHasher: FakeHasher
 let fakeEncrypter: FakeEncrypter
@@ -21,16 +17,12 @@ let sut: AuthenticateUseCase
 
 describe('Authenticate', () => {
   beforeEach(() => {
-    adminsRepository = new InMemoryAdminsRepository()
-    techniciansRepository = new InMemoryTechniciansRepository()
-    employeesRepository = new InMemoryEmployeesRepository()
+    usersRepository = new InMemoryUsersRepository()
     tenantsRepository = new InMemoryTenantsRepository()
     fakeHasher = new FakeHasher()
     fakeEncrypter = new FakeEncrypter()
     sut = new AuthenticateUseCase(
-      adminsRepository,
-      techniciansRepository,
-      employeesRepository,
+      usersRepository,
       tenantsRepository,
       fakeHasher,
       fakeEncrypter,
@@ -50,7 +42,7 @@ describe('Authenticate', () => {
       tenantId: tenant.id,
     })
 
-    techniciansRepository.items.push(technician)
+    usersRepository.items.push(technician)
 
     const result = await sut.execute({
       email: technician.email.value,
@@ -81,7 +73,7 @@ describe('Authenticate', () => {
       tenantId: new UniqueEntityID('id-from-another-tenant'),
     })
 
-    techniciansRepository.items.push(technician)
+    usersRepository.items.push(technician)
 
     const result = await sut.execute({
       email: technician.email.value,
@@ -106,7 +98,7 @@ describe('Authenticate', () => {
       tenantId: tenant.id,
     })
 
-    techniciansRepository.items.push(technician)
+    usersRepository.items.push(technician)
 
     const result = await sut.execute({
       email: technician.email.value,

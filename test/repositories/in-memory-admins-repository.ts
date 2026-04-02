@@ -1,11 +1,15 @@
 import { IAdminsRepository } from '@/domain/help-desk/application/repositories/admins-repository'
 import { Admin } from '@/domain/help-desk/enterprise/entities/admin'
+import { InMemoryUsersRepository } from './in-memory-users-repository'
 
 export class InMemoryAdminsRepository implements IAdminsRepository {
   public items: Admin[] = []
 
+  constructor(private usersRepository: InMemoryUsersRepository) {}
+
   async create(user: Admin) {
     this.items.push(user)
+    this.usersRepository.items.push(user)
   }
 
   async findById(id: string, tenantId: string) {
