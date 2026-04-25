@@ -1,16 +1,16 @@
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
-import { Admin } from '@/domain/help-desk/enterprise/entities/admin'
+import { SuperAdmin as SuperAdminDomain } from '@/domain/help-desk/enterprise/entities/super-admin'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
-import { User } from 'generated/prisma/client'
-import { ROLE } from 'generated/prisma/enums'
-import { UserUncheckedCreateInput } from 'generated/prisma/models'
+import { ROLE, SuperAdmin } from 'generated/prisma/client'
+import { SuperAdminUncheckedCreateInput } from 'generated/prisma/models'
 
-export class AdminMapper {
-  public static toPrisma(raw: Admin): UserUncheckedCreateInput {
+export class SuperAdminMapper {
+  public static toPrisma(
+    raw: SuperAdminDomain,
+  ): SuperAdminUncheckedCreateInput {
     return {
       id: raw.id.toString(),
-      tenantId: raw.tenantId.toString(),
-      role: ROLE.ADMIN,
+      role: ROLE.SUPER_ADMIN,
       firstName: raw.firstName,
       lastName: raw.lastName,
       email: raw.email.value,
@@ -19,15 +19,14 @@ export class AdminMapper {
     }
   }
 
-  public static toDomain(raw: User) {
-    return Admin.create(
+  public static toDomain(raw: SuperAdmin) {
+    return SuperAdminDomain.create(
       {
-        tenantId: new UniqueEntityID(raw.tenantId),
         firstName: raw.firstName,
         lastName: raw.lastName,
         email: EmailValueObject.create(raw.email),
         password: raw.password,
-        createdAt: raw.createdAt ? new Date(raw.createdAt) : undefined,
+        createdAt: raw.createdAt,
         updatedAt: raw.updatedAt ? new Date(raw.updatedAt) : undefined,
       },
       new UniqueEntityID(raw.id),
