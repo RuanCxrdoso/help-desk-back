@@ -35,6 +35,10 @@ export abstract class User<Props extends UserProps> extends Entity<Props> {
     return this.props.role
   }
 
+  get createdAt() {
+    return this.props.createdAt
+  }
+
   get tenantId() {
     return this.props.tenantId.toString()
   }
