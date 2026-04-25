@@ -19,7 +19,7 @@ export class AdminMapper {
     }
   }
 
-  public static toDomain(raw: User) {
+  public static toDomain(raw: User): Admin {
     return Admin.create(
       {
         tenantId: new UniqueEntityID(raw.tenantId),
@@ -27,8 +27,8 @@ export class AdminMapper {
         lastName: raw.lastName,
         email: EmailValueObject.create(raw.email),
         password: raw.password,
-        createdAt: raw.createdAt ? new Date(raw.createdAt) : undefined,
-        updatedAt: raw.updatedAt ? new Date(raw.updatedAt) : undefined,
+        createdAt: raw.createdAt,
+        updatedAt: raw.updatedAt,
       },
       new UniqueEntityID(raw.id),
     )
