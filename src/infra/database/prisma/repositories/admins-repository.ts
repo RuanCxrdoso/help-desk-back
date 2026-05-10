@@ -9,10 +9,10 @@ export class PrismaAdminsRepository implements IAdminsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(user: Admin): Promise<void> {
-    const prismaAdmin = AdminMapper.toPrisma(user)
+    const adminPrisma = AdminMapper.toPrisma(user)
 
     await this.prisma.user.create({
-      data: prismaAdmin,
+      data: adminPrisma,
     })
   }
 
