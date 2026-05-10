@@ -26,8 +26,6 @@ export class PrismaAdminsRepository implements IAdminsRepository {
 
     if (!admin) return null
 
-    const domainAdmin = AdminMapper.toDomain(admin)
-
-    return domainAdmin
+    return AdminMapper.toDomain(admin)
   }
 }
