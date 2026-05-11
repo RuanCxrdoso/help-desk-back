@@ -22,7 +22,9 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@/*": ["./src/*"],
-      "generated/*": ["./generated/*"]
+      "generated/*": ["./generated/*"],
+      "@types/*": ["./types/*"],
+      "test/*": ["./test/*"],
     },
     "types": ["vitest/globals"]
   }
