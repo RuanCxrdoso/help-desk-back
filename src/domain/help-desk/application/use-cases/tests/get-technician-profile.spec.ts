@@ -2,13 +2,16 @@ import { makeTechnician } from 'test/factories/make-technician'
 import { InMemoryTechniciansRepository } from 'test/repositories/in-memory-technicians-repository'
 import { GetTechnicianProfileUseCase } from '../get-technician-profile'
 import { NotAllowedError } from '../../errors/not-allowed-error'
+import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository'
 
+let usersRepository: InMemoryUsersRepository
 let techniciansRepository: InMemoryTechniciansRepository
 let sut: GetTechnicianProfileUseCase
 
 describe('Get Technician Profile', () => {
   beforeEach(() => {
-    techniciansRepository = new InMemoryTechniciansRepository()
+    usersRepository = new InMemoryUsersRepository()
+    techniciansRepository = new InMemoryTechniciansRepository(usersRepository)
     sut = new GetTechnicianProfileUseCase(techniciansRepository)
   })
 

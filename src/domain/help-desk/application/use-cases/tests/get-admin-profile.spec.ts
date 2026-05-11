@@ -2,13 +2,16 @@ import { makeAdmin } from 'test/factories/make-admin'
 import { InMemoryAdminsRepository } from 'test/repositories/in-memory-admins-repository'
 import { GetAdminProfileUseCase } from '../get-admin-profile'
 import { NotAllowedError } from '../../errors/not-allowed-error'
+import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository'
 
+let usersRepository: InMemoryUsersRepository
 let adminsRepository: InMemoryAdminsRepository
 let sut: GetAdminProfileUseCase
 
 describe('Get Admin Profile', () => {
   beforeEach(() => {
-    adminsRepository = new InMemoryAdminsRepository()
+    usersRepository = new InMemoryUsersRepository()
+    adminsRepository = new InMemoryAdminsRepository(usersRepository)
     sut = new GetAdminProfileUseCase(adminsRepository)
   })
 
