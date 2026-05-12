@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    container_name: help-desk-db
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRESQL_USERNAME=${DB_USER}
+      - POSTGRESQL_PASSWORD=${DB_PASSWORD}
+      - POSTGRESQL_DATABASE=${DB_NAME}
+      - TZ=${TZ:-America/Sao_Paulo}
+    volumes:
+      - pg_data:/bitnami/postgresql
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U $$POSTGRESQL_USERNAME -d $$POSTGRESQL_DATABASE',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1G
+    networks:
+      - helpdesk_network
+
+volumes:
+  pg_data:
+    name: helpdesk_pg_data
+
+networks:
+  helpdesk_network:
+    name: helpdesk_backend_network
+    driver: bridge

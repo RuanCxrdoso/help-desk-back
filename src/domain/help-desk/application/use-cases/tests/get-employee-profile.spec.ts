@@ -2,13 +2,16 @@ import { makeEmployee } from 'test/factories/make-employee'
 import { InMemoryEmployeesRepository } from 'test/repositories/in-memory-employees-repository'
 import { GetEmployeeProfileUseCase } from '../get-employee-profile'
 import { NotAllowedError } from '../../errors/not-allowed-error'
+import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository'
 
+let usersRepository: InMemoryUsersRepository
 let employeesRepository: InMemoryEmployeesRepository
 let sut: GetEmployeeProfileUseCase
 
 describe('Get Employee Profile', () => {
   beforeEach(() => {
-    employeesRepository = new InMemoryEmployeesRepository()
+    usersRepository = new InMemoryUsersRepository()
+    employeesRepository = new InMemoryEmployeesRepository(usersRepository)
     sut = new GetEmployeeProfileUseCase(employeesRepository)
   })
 

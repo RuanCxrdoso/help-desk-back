@@ -9,6 +9,7 @@ import { IAdminsRepository } from '../repositories/admins-repository'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { ITenantsRepository } from '../repositories/tenants-repository'
 import { NotFoundError } from '../errors/not-found-error'
+import { IUsersRepository } from '../repositories/users-repository'
 
 export interface RegisterTechnicianUseCaseRequest {
   creatorId: string
@@ -29,6 +30,7 @@ export class RegisterTechnicianUseCase {
     private tenantsRepository: ITenantsRepository,
     private techniciansRepository: ITechniciansRepository,
     private adminsRepository: IAdminsRepository,
+    private usersRepository: IUsersRepository,
     private hashGenerator: IHashGenerator,
   ) {}
 
@@ -47,8 +49,10 @@ export class RegisterTechnicianUseCase {
 
     if (!creator) return left(new NotAllowedError())
 
-    const technicianWithSameEmail =
-      await this.techniciansRepository.findByEmail(email, tenantId)
+    const technicianWithSameEmail = await this.usersRepository.findByEmail(
+      email,
+      tenantId,
+    )
 
     if (technicianWithSameEmail) return left(new UserAlreadyExistsError())
 
