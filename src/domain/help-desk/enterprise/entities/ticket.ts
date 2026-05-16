@@ -6,6 +6,7 @@ import { Optional } from '@/core/types/optional'
 import { InvalidTicketStatusError } from '../errors/invalid-ticket-status'
 
 export interface TicketProps {
+  tenantId: UniqueEntityID
   employeeId: UniqueEntityID
   technicianId: UniqueEntityID | null
   title: string
@@ -14,7 +15,6 @@ export interface TicketProps {
   priority: TicketPriorityType
   createdAt: Date
   updatedAt?: Date | null
-  tenantId: UniqueEntityID
 }
 
 export class Ticket extends Entity<TicketProps> {
