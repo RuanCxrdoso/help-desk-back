@@ -139,7 +139,7 @@ export class Ticket extends Entity<TicketProps> {
     this.touch()
   }
 
-  // Fecha o ticket (TODOS)
+  // Fecha o ticket (FUNCIONÁRIO/ADMIN)
   public close(): InvalidTicketStatusError | void {
     if (this.props.status === TICKET_STATUS.CLOSED) return
 
