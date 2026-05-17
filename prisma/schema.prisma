@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ROLE {
+  EMPLOYEE
+  TECHNICIAN
+  ADMIN
+}
+
+enum TICKET_STATUS {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CANCELLED
+  CLOSED
+}
+
+enum TICKET_PRIORITY {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  users     User[]
+  tickets   Ticket[]
+
+  @@map("tenant")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  role      ROLE     @default(EMPLOYEE)
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  email     String
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  adminProfile      AdminProfile?
+  technicianProfile TechnicianProfile?
+  employeeProfile   EmployeeProfile?
+  ticketsCreated    Ticket[]           @relation("EmployeeTickets")
+  ticketsAssigned   Ticket[]           @relation("TechnicianTickets")
+
+  @@unique([email, tenantId])
+  @@index([tenantId])
+  @@map("user")
+}
+
+model AdminProfile {
+  adminId    String @id @map("admin_id")
+  department String
+  jobTitle   String @map("job_title")
+
+  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("admin_profile")
+}
+
+model TechnicianProfile {
+  technicianId String   @id @map("technician_id")
+  supportLevel Int      @map("support_level")
+  specialties  String[]
+
+  technician User @relation(fields: [technicianId], references: [id], onDelete: Cascade)
+
+  @@map("technician_profile")
+}
+
+model EmployeeProfile {
+  employeeId String @id @map("employee_id")
+  department String
+  jobTitle   String @map("job_title")
+  location   String
+
+  employee User @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("employee_profile")
+}
+
+model SuperAdmin {
+  id        String   @id @default(uuid())
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("super_admin")
+}
+
+model Ticket {
+  id           String          @id @default(uuid())
+  tenantId     String          @map("tenant_id")
+  employeeId   String          @map("employee_id")
+  technicianId String?         @map("technician_id")
+  title        String
+  description  String
+  status       TICKET_STATUS   @default(OPEN)
+  priority     TICKET_PRIORITY @default(LOW)
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  employee   User   @relation("EmployeeTickets", fields: [employeeId], references: [id])
+  technician User?  @relation("TechnicianTickets", fields: [technicianId], references: [id])
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([status])
+  @@map("ticket")
+}

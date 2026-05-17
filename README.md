@@ -3,21 +3,25 @@
 Abaixo estão todos os requisitos funcionais do sistema, modelados como Use Cases da camada de Aplicação.
 
 ### Fase 1: Autenticação, Gestão de Usuários e Multi-tenancy
-- [ ✅ ] `RegisterTenantAndAdminUseCase`: Fluxo de *SaaS Onboarding*. Cria uma nova empresa (Tenant) e seu administrador fundador em uma única transação atômica no banco de dados, validando unicidade de *slug* e e-mail global.
-- [ ✅ ] `RegisterAdminUseCase`: Cadastro de administradores adicionais atrelados a um Tenant existente. **Restrito a Super Administradores**. 
-- [ ✅ ] `RegisterTechnicianUseCase`: Cadastro de novos técnicos operacionais atrelados a um Tenant. **Restrito a Administradores**.
-- [ ✅ ] `RegisterEmployeeUseCase`: Cadastro de funcionários (clientes finais) atrelados a um Tenant. **Restrito a Administradores**.
-- [ ✅ ] `AuthenticateSuperAdminUseCase`: Autenticação exclusiva para a plataforma (Host). Requer apenas e-mail e senha, gerando um JWT de administração global (sem `tenantId`).
-- [ ✅ ] `AuthenticateUseCase`: Autenticação de usuários do tenant (Admins, Técnicos e Funcionários). Exige o `tenantSlug` (contexto do Workspace) para isolamento lógico e retorna um JWT contendo o `tenantId`.
-- [ ] `GetUserProfileUseCase`: Retorna os dados do usuário logado baseado no `sub` e `tenantId` do token (essencial para a renderização inicial e controle de rotas no Next.js).
+- [ ✅ ] `RegisterTenantAndAdminUseCase`: Fluxo de *SaaS Onboarding*. Cria uma nova empresa (Tenant) e seu administrador fundador em uma única transação atômica.
+- [ ✅ ] `RegisterAdminUseCase`: Cadastro de administradores adicionais. **Restrito a Super Administradores**. 
+- [ ✅ ] `RegisterTechnicianUseCase`: Cadastro de técnicos operacionais. **Restrito a Administradores**.
+- [ ✅ ] `RegisterEmployeeUseCase`: Cadastro de funcionários. **Restrito a Administradores**.
+- [ ✅ ] `AuthenticateSuperAdminUseCase`: Autenticação global (Host). Retorna JWT sem `tenantId`.
+- [ ✅ ] `AuthenticateUseCase`: Autenticação de usuários do tenant. Requer `tenantSlug` e retorna JWT com `tenantId`.
+- [ ✅ ] `Setup de Autorização (CASL ABAC)`: Fábrica de regras granulares baseada em papéis, escopo de tenant e estado do recurso.
+- [ ✅ ] `GetAdminProfileUseCase`: Retorna dados detalhados do perfil de um Administrador.
+- [ ✅ ] `GetEmployeeProfileUseCase`: Retorna dados detalhados do perfil de um Funcionário.
+- [ ✅ ] `GetTechnicianProfileUseCase`: Retorna dados detalhados do perfil de um Técnico.
+- [ ✅ ] `GetSuperAdminProfileUseCase`: Retorna dados detalhados do perfil de um Super Administrador.
 
 ### Fase 2: Infraestrutura de Arquivos (Storage)
 - [ ] `UploadAndCreateAttachmentUseCase`: Recebe um arquivo via `multipart/form-data`, valida formato/tamanho, faz o upload para o Storage (ex: AWS S3 ou R2) e persiste o registro lógico no banco.
 
 ### Fase 3: Domínio Core - Visão do Funcionário (Employee)
 - [ ] `CreateTicketUseCase`: Abertura de um chamado contendo título, descrição, categoria, prioridade e anexos iniciais (vinculação via Watched Lists). Status inicial obrigatório: `OPEN`.
-- [ ] `EditTicketUseCase`: Permite ao autor alterar a descrição e gerenciar anexos (adicionar/remover) **somente** se o ticket estiver no status `OPEN`.
-- [ ] `CancelTicketUseCase`: Autor cancela o próprio chamado antes de ser atendido.
+- [ ] `EditTicketUseCase`: Permite ao autor alterar título/descrição e gerenciar anexos. **Bloqueado** se o ticket estiver `CLOSED`, `CANCELLED` ou `RESOLVED`.
+- [ ] `CancelTicketUseCase`: Autor cancela o próprio chamado. Permitido apenas se o ticket não estiver finalizado definitivamente.
 - [ ] `FetchEmployeeTicketsUseCase`: Listagem paginada dos tickets pertencentes exclusivamente ao funcionário logado.
 - [ ] `GetTicketDetailsUseCase`: Retorna todos os dados de um ticket. Valida se o usuário logado é o autor original, um técnico ou admin.
 
@@ -25,9 +29,9 @@ Abaixo estão todos os requisitos funcionais do sistema, modelados como Use Case
 - [ ] `FetchAllTicketsUseCase`: Listagem global paginada com suporte a filtros combinados (status, prioridade, categoria) e ordenação. Fonte de dados para o TanStack Table.
 - [ ] `AssignTicketUseCase`: Técnico assume o ticket. Altera o status de `OPEN` para `IN_PROGRESS` e define o `assigneeId`. (Gatilho para Domain Event).
 - [ ] `ResolveTicketUseCase`: Técnico finaliza o atendimento com uma nota técnica de resolução. Altera status para `RESOLVED`. (Gatilho para Domain Event).
-- [ ] `CloseTicketUseCase`: Fechamento definitivo (`CLOSED`) após a resolução. Nenhuma modificação posterior é permitida.
+- [ ] `CloseTicketUseCase`: Fechamento definitivo (`CLOSED`). Restrito a tickets que estão previamente com status `RESOLVED`.
 - [ ] `UnassignTicketUseCase`: Técnico devolve o ticket para a fila (`OPEN`), removendo sua autoria.
-- [ ] `ReopenTicketUseCase`: Ticket retorna de `RESOLVED`/`CLOSED` para `OPEN` caso o problema persista.
+- [ ] `ReopenTicketUseCase`: Ticket retorna para `IN_PROGRESS` (se já possuía um técnico) ou para `OPEN` (se não possuía) caso o problema persista.
 
 ### Fase 5: Interações e Histórico (Thread)
 - [ ] `CommentOnTicketUseCase`: Permite envio de mensagens na thread do chamado para tirar dúvidas ou pedir mais informações.
@@ -40,19 +44,21 @@ Abaixo estão todos os requisitos funcionais do sistema, modelados como Use Case
 
 ---
 
-## 🔐 Matriz de Permissões (RBAC)
+## 🔐 Matriz de Permissões (RBAC & ABAC)
 
-O controle de acesso baseado em papéis (Role-Based Access Control) dita quais Casos de Uso cada ator pode executar. O sistema possui um modelo de privilégios concêntricos (Admin herda acessos de Técnico, que acessa dados de Employee).
+O controle de acesso foi implementado utilizando a biblioteca **@casl/ability**, garantindo isolamento rigoroso de Multi-Tenancy (`tenantId`) e validando a propriedade dos dados (`employeeId`, `technicianId`) em tempo de execução. As políticas de segurança operam em conjunto com a máquina de estados das Entidades de Domínio.
 
-| Recurso / Ação | Funcionário (`EMPLOYEE`) | Técnico (`TECHNICIAN`) | Admin (`ADMIN`) | Regra de Negócio (Application Rules) |
+| Recurso / Ação | Funcionário (`EMPLOYEE`) | Técnico (`TECHNICIAN`) | Admin Inquilino (`ADMIN`) | Regras de Segurança e Domínio (CASL) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Login e Perfil** | Permitido | Permitido | Permitido | Acesso global mediante credenciais válidas. |
-| **Cadastrar Usuários**| Negado | Negado | **Permitido** | O Use Case barra a execução se o requestor não for Admin. |
-| **Criar Ticket** | Permitido | Permitido | Permitido | Técnicos/Admins também podem ser clientes do suporte. |
-| **Editar/Cancelar** | Permitido (Apenas seus) | Negado | Permitido | O usuário só edita se `status === OPEN`. |
-| **Listar Tickets** | Permitido (Apenas seus) | Permitido (Todos) | Permitido (Todos) | Filtragem aplicada na query do Repositório via JWT role. |
-| **Detalhes do Ticket**| Permitido (Apenas seus) | Permitido (Todos) | Permitido (Todos) | Exceção `NotAllowedError` se um funcionário acessar ID de terceiros. |
-| **Assumir (`Assign`)**| Negado | Permitido | Permitido | Transição restrita de `OPEN` para `IN_PROGRESS`. |
-| **Resolver Ticket** | Negado | Permitido (Responsável)| Permitido | Apenas o técnico designado ou um Admin podem resolver. |
-| **Fechar Ticket** | Negado | Permitido (Responsável)| Permitido | Transição restrita de `RESOLVED` para `CLOSED`. |
-| **Comentar** | Permitido (Apenas seus) | Permitido | Permitido | Comunicação bloqueada se o status for `CLOSED`. |
+| **Autenticação e Perfil** | Ler/Atualizar (Próprio) | Ler/Atualizar (Próprio) | Gerenciar (Todos do Inquilino)| Regra anti-orfandade: Usuários (incluindo Admin) não deletam a própria conta. |
+| **Listar Usuários** | Permitido (Mesmo Tenant) | Permitido (Mesmo Tenant) | Permitido (Todos) | Permite visibilidade interna. Gestão (Create/Delete) é exclusiva de Admins. |
+| **Criar Ticket** | Permitido | Negado | Permitido | Apenas solicitantes reais (Employees) e Admins abrem chamados. |
+| **Listar/Ler Tickets** | Permitido (Apenas seus) | Permitido (Todos) | Permitido (Todos) | Funcionários veem apenas tickets onde `employeeId === user.sub`. |
+| **Atualizar Dados** | Permitido (Apenas seus) | Permitido (Seus ou Sem dono)| Permitido | **Imutabilidade:** Bloqueado se `status` for `CLOSED`, `CANCELLED` ou `RESOLVED`. |
+| **Deletar Ticket** | Negado | Negado | Permitido | Apenas Admins deletam. SuperAdmin gerencia cross-tenant. |
+| **Assumir (`Assign`)** | Negado | Permitido (Sem dono) | Permitido | Válido apenas para tickets `OPEN` ou `IN_PROGRESS` sem técnico atribuído. |
+| **Desatribuir/Resolver**| Negado | Permitido (Apenas seus) | Permitido | Travado na Entidade se o status não for `OPEN` ou `IN_PROGRESS`. |
+| **Cancelar / Reabrir** | Permitido (Apenas seus) | Permitido (Apenas seus) | Permitido | Reabrir move para `IN_PROGRESS` se houver técnico, ou `OPEN` se estiver vago. |
+| **Fechar Ticket** | Permitido (Apenas seus) | Negado | Permitido | **Fluxo de Confirmação:** Só é permitido fechar tickets com status `RESOLVED`. |
+
+> **Nota de Sistema (`SUPER_ADMIN`):** O Super Administrador possui permissão global e cross-tenant (`Manage: 'all'`). Ele administra os Tenants da plataforma SaaS e gerencia assinaturas, sendo tecnicamente bloqueado apenas de executar a exclusão do próprio perfil.

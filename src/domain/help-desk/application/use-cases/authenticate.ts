@@ -1,16 +1,10 @@
 import { Either, left, right } from '@/core/error/either'
-import { Admin } from '../../enterprise/entities/admin'
-import { Employee } from '../../enterprise/entities/employee'
-import { SuperAdmin } from '../../enterprise/entities/super-admin'
-import { Technician } from '../../enterprise/entities/technician'
-import { IAdminsRepository } from '../repositories/admins-repository'
-import { IEmployeesRepository } from '../repositories/employees-repository'
-import { ITechniciansRepository } from '../repositories/technicians-repository'
 import { InvalidCredentialsError } from '../errors/invalid-credentials-error'
 import { IHashComparer } from '../cryptography/hash-comparer'
 import { IEncrypter } from '../cryptography/encrypter'
 import { ITenantsRepository } from '../repositories/tenants-repository'
 import { NotFoundError } from '../errors/not-found-error'
+import { IUsersRepository } from '../repositories/users-repository'
 
 interface AuthenticateRequest {
   email: string
@@ -25,9 +19,7 @@ type AuthenticateResponse = Either<
 
 export class AuthenticateUseCase {
   constructor(
-    private adminsRepository: IAdminsRepository,
-    private techniciansRepository: ITechniciansRepository,
-    private employeesRepository: IEmployeesRepository,
+    private usersRepository: IUsersRepository,
     private tenantsRepository: ITenantsRepository,
     private hashComparer: IHashComparer,
     private encrypter: IEncrypter,
@@ -44,40 +36,24 @@ export class AuthenticateUseCase {
 
     const { id: tenantId } = tenant
 
-    let account: Employee | Technician | Admin | SuperAdmin | null = null
-
-    account = await this.employeesRepository.findByEmail(
+    const user = await this.usersRepository.findByEmail(
       email,
       tenantId.toString(),
     )
 
-    if (!account) {
-      account = await this.techniciansRepository.findByEmail(
-        email,
-        tenantId.toString(),
-      )
-    }
-
-    if (!account) {
-      account = await this.adminsRepository.findByEmail(
-        email,
-        tenantId.toString(),
-      )
-    }
-
-    if (!account) return left(new InvalidCredentialsError())
+    if (!user) return left(new InvalidCredentialsError())
 
     const isPasswordMatch = await this.hashComparer.compare(
       password,
-      account.password,
+      user.password,
     )
 
     if (!isPasswordMatch) return left(new InvalidCredentialsError())
 
     const accessToken = await this.encrypter.encrypt({
-      sub: account.id.toString(),
-      role: account.role,
-      tenantId: account.tenantId.toString(),
+      sub: user.id.toString(),
+      role: user.role,
+      tenantId: user.tenantId.toString(),
     })
 
     return right({

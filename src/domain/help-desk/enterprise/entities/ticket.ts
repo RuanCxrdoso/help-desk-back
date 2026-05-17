@@ -3,8 +3,10 @@ import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { TicketPriorityType } from '@/core/enums/ticket-priority'
 import { TICKET_STATUS, TicketStatusType } from '@/core/enums/ticket-status'
 import { Optional } from '@/core/types/optional'
+import { InvalidTicketStatusError } from '../errors/invalid-ticket-status'
 
 export interface TicketProps {
+  tenantId: UniqueEntityID
   employeeId: UniqueEntityID
   technicianId: UniqueEntityID | null
   title: string
@@ -13,7 +15,6 @@ export interface TicketProps {
   priority: TicketPriorityType
   createdAt: Date
   updatedAt?: Date | null
-  tenantId: UniqueEntityID
 }
 
 export class Ticket extends Entity<TicketProps> {
@@ -75,27 +76,33 @@ export class Ticket extends Entity<TicketProps> {
     this.props.updatedAt = new Date()
   }
 
-  // Delega o ticket para um técnico (TÉCNICO) (OPEN => IN_PROGRESS)
-  public assignTo(technicianId: UniqueEntityID) {
-    if (this.props.status !== TICKET_STATUS.OPEN) {
-      throw new Error(
-        'Cannot assign a technician to a closed or cancelled ticket.',
-      )
+  // Delega o ticket para um técnico (TÉCNICO/ADMIN)
+  public assignTo(
+    technicianId: UniqueEntityID,
+  ): InvalidTicketStatusError | void {
+    if (this.props.technicianId === technicianId) return
+
+    const allowedStatuses = ['OPEN', 'IN_PROGRESS']
+
+    if (!allowedStatuses.includes(this.props.status)) {
+      return new InvalidTicketStatusError('assign', this.props.status)
     }
 
     this.props.technicianId = technicianId
+
     this.props.status = TICKET_STATUS.IN_PROGRESS
 
     this.touch()
   }
 
-  // Remove o técnico do ticket (TÉCNICO) (IN_PROGRESS => OPEN)
-  public unassign() {
+  // Remove o técnico do ticket (TÉCNICO/ADMIN)
+  public unassign(): InvalidTicketStatusError | void {
     if (this.props.technicianId === null) return
-    if (this.props.status !== TICKET_STATUS.IN_PROGRESS) {
-      throw new Error(
-        `Cannot unassign a technician from a ticket with '${this.props.status} status'`,
-      )
+
+    const allowedStatuses = ['OPEN', 'IN_PROGRESS']
+
+    if (!allowedStatuses.includes(this.props.status)) {
+      return new InvalidTicketStatusError('unassign', this.props.status)
     }
 
     this.props.technicianId = null
@@ -104,50 +111,55 @@ export class Ticket extends Entity<TicketProps> {
     this.touch()
   }
 
-  // Marca o ticket como resolvido (TÉCNICO) (IN_PROGRESS => RESOLVED)
-  public resolve() {
-    if (this.props.status !== TICKET_STATUS.IN_PROGRESS) {
-      throw new Error('Only one ongoing ticket could be resolved.')
+  // Marca o ticket como resolvido (TÉCNICO/ADMIN)
+  public resolve(): InvalidTicketStatusError | void {
+    if (this.props.status === TICKET_STATUS.RESOLVED) return
+
+    const allowedStatuses = ['OPEN', 'IN_PROGRESS']
+
+    if (!allowedStatuses.includes(this.props.status)) {
+      return new InvalidTicketStatusError('resolve', this.props.status)
     }
 
     this.props.status = TICKET_STATUS.RESOLVED
     this.touch()
   }
 
-  // Cancela o ticket (TÉCNICO E FUNCIONÁRIO) (OPEN ou IN_PROGRESS => CANCELLED)
-  public cancel() {
-    if (
-      this.props.status === TICKET_STATUS.CANCELLED ||
-      this.props.status === TICKET_STATUS.CLOSED
-    ) {
-      throw new Error(
-        `Ticket with status '${this.props.status}' could not be cancelled.`,
-      )
+  // Cancela o ticket (TODOS)
+  public cancel(): InvalidTicketStatusError | void {
+    if (this.props.status === TICKET_STATUS.CANCELLED) return
+
+    const allowedStatuses = ['OPEN', 'IN_PROGRESS', 'RESOLVED']
+
+    if (!allowedStatuses.includes(this.props.status)) {
+      return new InvalidTicketStatusError('cancel', this.props.status)
     }
 
     this.props.status = TICKET_STATUS.CANCELLED
     this.touch()
   }
 
-  // Fecha o ticket (FUNCIONÁRIO) (RESOLVED => CLOSED)
-  public close() {
-    if (this.props.status !== TICKET_STATUS.RESOLVED) {
-      throw new Error('Only resolved tickets could be closed.')
+  // Fecha o ticket (FUNCIONÁRIO/ADMIN)
+  public close(): InvalidTicketStatusError | void {
+    if (this.props.status === TICKET_STATUS.CLOSED) return
+
+    const allowedStatuses = ['RESOLVED']
+
+    if (!allowedStatuses.includes(this.props.status)) {
+      return new InvalidTicketStatusError('close', this.props.status)
     }
 
     this.props.status = TICKET_STATUS.CLOSED
     this.touch()
   }
 
-  // Reabre o ticket (FUNCIONÁRIO) (RESOLVED ou CLOSED => OPEN)
+  // Reabre o ticket (TODOS)
   public reopen() {
-    if (
-      this.props.status !== TICKET_STATUS.RESOLVED &&
-      this.props.status !== TICKET_STATUS.CLOSED
-    ) {
-      throw new Error(
-        `Ticket with status '${this.props.status}' could not be reopened.`,
-      )
+    if (this.props.technicianId) {
+      this.props.status = TICKET_STATUS.IN_PROGRESS
+      this.touch()
+
+      return
     }
 
     this.props.status = TICKET_STATUS.OPEN

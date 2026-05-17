@@ -6,17 +6,20 @@ import { InMemoryAdminsRepository } from 'test/repositories/in-memory-admins-rep
 import { makeTenant } from 'test/factories/make-tenant'
 import { Slug } from '@/domain/help-desk/enterprise/entities/value-objects/slug-value-object'
 import { TenantAlreadyExistsError } from '../../errors/tenant-already-exists-error'
+import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository'
 
 let tenantAndAdminRegister: TenantAndAdminRegisterGatewayTest
 let hasher: FakeHasher
 let tenantsRepository: InMemoryTenantsRepository
+let usersRepository: InMemoryUsersRepository
 let adminsRepository: InMemoryAdminsRepository
 let sut: RegisterTenantAndAdminUseCase
 
 describe('Register Tenant and Admin', () => {
   beforeEach(() => {
     tenantsRepository = new InMemoryTenantsRepository()
-    adminsRepository = new InMemoryAdminsRepository()
+    usersRepository = new InMemoryUsersRepository()
+    adminsRepository = new InMemoryAdminsRepository(usersRepository)
     tenantAndAdminRegister = new TenantAndAdminRegisterGatewayTest(
       tenantsRepository,
       adminsRepository,

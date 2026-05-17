@@ -9,6 +9,7 @@ import { ISuperAdminsRepository } from '../repositories/super-admins-repository'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { ITenantsRepository } from '../repositories/tenants-repository'
 import { NotFoundError } from '../errors/not-found-error'
+import { IUsersRepository } from '../repositories/users-repository'
 
 export interface RegisterAdminUseCaseRequest {
   creatorId: string
@@ -29,6 +30,7 @@ export class RegisterAdminUseCase {
     private tenantsRepository: ITenantsRepository,
     private adminsRepository: IAdminsRepository,
     private superAdminsRepository: ISuperAdminsRepository,
+    private usersRepository: IUsersRepository,
     private hashGenerator: IHashGenerator,
   ) {}
 
@@ -45,7 +47,7 @@ export class RegisterAdminUseCase {
 
     if (!creator) return left(new NotAllowedError())
 
-    const adminWithSameEmail = await this.adminsRepository.findByEmail(
+    const adminWithSameEmail = await this.usersRepository.findByEmail(
       data.email,
       data.tenantId,
     )

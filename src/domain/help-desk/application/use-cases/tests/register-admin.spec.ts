@@ -12,9 +12,11 @@ import { InMemoryTenantsRepository } from 'test/repositories/in-memory-tenants-r
 import { Tenant } from '@/domain/help-desk/enterprise/entities/tenant'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { NotFoundError } from '../../errors/not-found-error'
+import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository'
 
 let hasher: IHashGenerator
 let tenantsRepository: InMemoryTenantsRepository
+let usersRepository: InMemoryUsersRepository
 let adminsRepository: InMemoryAdminsRepository
 let superAdminsRepository: InMemorySuperAdminsRepository
 let sut: RegisterAdminUseCase
@@ -23,12 +25,14 @@ describe('Register Admin', () => {
   beforeEach(() => {
     hasher = new FakeHasher()
     tenantsRepository = new InMemoryTenantsRepository()
-    adminsRepository = new InMemoryAdminsRepository()
+    usersRepository = new InMemoryUsersRepository()
+    adminsRepository = new InMemoryAdminsRepository(usersRepository)
     superAdminsRepository = new InMemorySuperAdminsRepository()
     sut = new RegisterAdminUseCase(
       tenantsRepository,
       adminsRepository,
       superAdminsRepository,
+      usersRepository,
       hasher,
     )
   })
@@ -116,7 +120,7 @@ describe('Register Admin', () => {
       tenantId: tenant.id,
     })
 
-    adminsRepository.items.push(admin)
+    await adminsRepository.create(admin)
 
     const result = await sut.execute({
       creatorId: superAdmin.id.toString(),

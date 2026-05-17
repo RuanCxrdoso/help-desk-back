@@ -12,9 +12,11 @@ import { InMemoryTenantsRepository } from 'test/repositories/in-memory-tenants-r
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { Tenant } from '@/domain/help-desk/enterprise/entities/tenant'
 import { NotFoundError } from '../../errors/not-found-error'
+import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository'
 
 let hasher: IHashGenerator
 let tenantsRepository: InMemoryTenantsRepository
+let usersRepository: InMemoryUsersRepository
 let adminsRepository: InMemoryAdminsRepository
 let techniciansRepository: InMemoryTechniciansRepository
 let sut: RegisterTechnicianUseCase
@@ -23,12 +25,14 @@ describe('Register Technician', () => {
   beforeEach(() => {
     hasher = new FakeHasher()
     tenantsRepository = new InMemoryTenantsRepository()
-    adminsRepository = new InMemoryAdminsRepository()
-    techniciansRepository = new InMemoryTechniciansRepository()
+    usersRepository = new InMemoryUsersRepository()
+    adminsRepository = new InMemoryAdminsRepository(usersRepository)
+    techniciansRepository = new InMemoryTechniciansRepository(usersRepository)
     sut = new RegisterTechnicianUseCase(
       tenantsRepository,
       techniciansRepository,
       adminsRepository,
+      usersRepository,
       hasher,
     )
   })
@@ -114,7 +118,7 @@ describe('Register Technician', () => {
       tenantId: tenant.id,
     })
 
-    adminsRepository.items.push(admin)
+    await adminsRepository.create(admin)
 
     const technician = Technician.create({
       firstName: 'James',
@@ -124,7 +128,7 @@ describe('Register Technician', () => {
       tenantId: tenant.id,
     })
 
-    techniciansRepository.items.push(technician)
+    await techniciansRepository.create(technician)
 
     const result = await sut.execute({
       creatorId: admin.id.toString(),
