@@ -1,7 +1,7 @@
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { SuperAdmin as SuperAdminDomain } from '@/domain/help-desk/enterprise/entities/super-admin'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
-import { ROLE, SuperAdmin } from 'generated/prisma/client'
+import { SuperAdmin } from 'generated/prisma/client'
 import { SuperAdminUncheckedCreateInput } from 'generated/prisma/models'
 
 export class SuperAdminMapper {
@@ -10,7 +10,6 @@ export class SuperAdminMapper {
   ): SuperAdminUncheckedCreateInput {
     return {
       id: raw.id.toString(),
-      role: ROLE.SUPER_ADMIN,
       firstName: raw.firstName,
       lastName: raw.lastName,
       email: raw.email.value,
