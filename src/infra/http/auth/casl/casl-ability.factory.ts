@@ -9,6 +9,7 @@ import { Subjects } from './subjects'
 import { Injectable } from '@nestjs/common'
 import { TokenPayload } from '../jwt.strategy'
 import { ROLE } from '@/core/enums/role'
+import { TICKET_STATUS } from 'generated/prisma/enums'
 
 export type AppAbility = MongoAbility<[Action, Subjects]>
 
@@ -53,8 +54,28 @@ export class CaslAbilityFactory {
 
       can(Read, 'Tenant', { id: user.tenantId })
 
-      can(Update, 'Ticket', { tenantId: user.tenantId, technicianId: user.sub })
-      can(Update, 'Ticket', { tenantId: user.tenantId, technicianId: null })
+      can(Update, 'Ticket', {
+        tenantId: user.tenantId,
+        technicianId: user.sub,
+        status: {
+          $nin: [
+            TICKET_STATUS.CLOSED,
+            TICKET_STATUS.CANCELLED,
+            TICKET_STATUS.RESOLVED,
+          ],
+        },
+      })
+      can(Update, 'Ticket', {
+        tenantId: user.tenantId,
+        technicianId: null,
+        status: {
+          $nin: [
+            TICKET_STATUS.CLOSED,
+            TICKET_STATUS.CANCELLED,
+            TICKET_STATUS.RESOLVED,
+          ],
+        },
+      })
 
       can(Read, 'Ticket', { tenantId: user.tenantId })
       can(Assign, 'Ticket', { tenantId: user.tenantId, technicianId: null })
@@ -73,7 +94,17 @@ export class CaslAbilityFactory {
 
       can(Create, 'Ticket')
       can(Read, 'Ticket', { tenantId: user.tenantId, employeeId: user.sub })
-      can(Update, 'Ticket', { tenantId: user.tenantId, employeeId: user.sub })
+      can(Update, 'Ticket', {
+        tenantId: user.tenantId,
+        employeeId: user.sub,
+        status: {
+          $nin: [
+            TICKET_STATUS.CLOSED,
+            TICKET_STATUS.CANCELLED,
+            TICKET_STATUS.RESOLVED,
+          ],
+        },
+      })
 
       can([Cancel, Close, Reopen], 'Ticket', {
         tenantId: user.tenantId,

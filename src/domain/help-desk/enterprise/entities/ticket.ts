@@ -155,7 +155,12 @@ export class Ticket extends Entity<TicketProps> {
 
   // Reabre o ticket (TODOS)
   public reopen() {
-    if (this.props.status === TICKET_STATUS.OPEN) return
+    if (this.props.technicianId) {
+      this.props.status = TICKET_STATUS.IN_PROGRESS
+      this.touch()
+
+      return
+    }
 
     this.props.status = TICKET_STATUS.OPEN
     this.props.technicianId = null
