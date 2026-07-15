@@ -27,30 +27,42 @@ enum TICKET_PRIORITY {
   HIGH
 }
 
-model Tenant {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  users     User[]
-  tickets   Ticket[]
+enum TENANT_STATUS {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
 
+model Tenant {
+  id        String        @id @default(uuid())
+  name      String
+  slug      String        @unique
+  status    TENANT_STATUS @default(ACTIVE)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  deletedAt DateTime?     @map("deleted_at")
+
+  users   User[]
+  tickets Ticket[]
+
+  @@index([slug, status, deletedAt])
   @@map("tenant")
 }
 
 model User {
-  id        String   @id @default(uuid())
-  tenantId  String   @map("tenant_id")
-  role      ROLE     @default(EMPLOYEE)
-  firstName String   @map("first_name")
-  lastName  String   @map("last_name")
+  id        String    @id @default(uuid())
+  tenantId  String    @map("tenant_id")
+  role      ROLE      @default(EMPLOYEE)
+  firstName String    @map("first_name")
+  lastName  String    @map("last_name")
   email     String
   password  String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   adminProfile      AdminProfile?
   technicianProfile TechnicianProfile?
@@ -59,7 +71,7 @@ model User {
   ticketsAssigned   Ticket[]           @relation("TechnicianTickets")
 
   @@unique([email, tenantId])
-  @@index([tenantId])
+  @@index([tenantId, role, isActive, deletedAt])
   @@map("user")
 }
 
@@ -118,11 +130,12 @@ model Ticket {
   createdAt    DateTime        @default(now()) @map("created_at")
   updatedAt    DateTime        @updatedAt @map("updated_at")
 
-  employee   User   @relation("EmployeeTickets", fields: [employeeId], references: [id])
-  technician User?  @relation("TechnicianTickets", fields: [technicianId], references: [id])
+  employee   User   @relation("EmployeeTickets", fields: [employeeId], references: [id], onDelete: Restrict)
+  technician User?  @relation("TechnicianTickets", fields: [technicianId], references: [id], onDelete: Restrict)
   tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@index([tenantId])
-  @@index([status])
+  @@index([tenantId, technicianId, status])
+  @@index([tenantId, employeeId, status])
+  @@index([tenantId, status, createdAt])
   @@map("ticket")
 }
