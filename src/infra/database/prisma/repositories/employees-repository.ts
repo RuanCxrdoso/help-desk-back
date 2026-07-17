@@ -3,6 +3,7 @@ import { Employee } from '@/domain/help-desk/enterprise/entities/employee'
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
 import { EmployeeMapper } from '../mappers/employee-mapper'
+import { ROLE } from 'generated/prisma/enums'
 
 @Injectable()
 export class PrismaEmployeesRepository implements IEmployeesRepository {
@@ -21,10 +22,14 @@ export class PrismaEmployeesRepository implements IEmployeesRepository {
       where: {
         id,
         tenantId,
+        role: ROLE.EMPLOYEE,
+      },
+      include: {
+        employeeProfile: true,
       },
     })
 
-    if (!employee) return null
+    if (!employee || !employee.employeeProfile) return null
 
     return EmployeeMapper.toDomain(employee)
   }

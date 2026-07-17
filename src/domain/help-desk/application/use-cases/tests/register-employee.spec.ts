@@ -50,6 +50,7 @@ describe('Register Employee', () => {
       email: EmailValueObject.create('johndoe@email.com'),
       password: '123456',
       tenantId: tenant.id,
+      isActive: true,
     })
 
     adminsRepository.items.push(admin)
@@ -64,6 +65,7 @@ describe('Register Employee', () => {
       department: 'Raio X e Imagens',
       jobTitle: 'Tecnico em Radiografia',
       location: '3 andar, sala 8',
+      isActive: true,
     })
 
     expect(result.isRight()).toBeTruthy()
@@ -94,6 +96,7 @@ describe('Register Employee', () => {
       department: 'Recepção',
       jobTitle: 'Recepcionista',
       location: 'Térreo principal',
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()
@@ -113,6 +116,7 @@ describe('Register Employee', () => {
       email: EmailValueObject.create('johndoe@email.com'),
       password: '123456',
       tenantId: tenant.id,
+      isActive: true,
     })
 
     await adminsRepository.create(admin)
@@ -126,6 +130,7 @@ describe('Register Employee', () => {
       department: 'Recepção',
       jobTitle: 'Fichador',
       location: 'Térreo principal',
+      isActive: true,
     })
 
     await employeesRepository.create(employee)
@@ -140,6 +145,7 @@ describe('Register Employee', () => {
       department: 'Recepção',
       jobTitle: 'Recepcionista',
       location: 'Térreo principal',
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()
@@ -153,6 +159,7 @@ describe('Register Employee', () => {
       email: EmailValueObject.create('johndoe@email.com'),
       password: '123456',
       tenantId: new UniqueEntityID('non-existing-tenant-id'),
+      isActive: true,
     })
 
     adminsRepository.items.push(admin)
@@ -167,6 +174,7 @@ describe('Register Employee', () => {
       department: 'Farmácia',
       jobTitle: 'Recepcionista',
       location: '2 andar, sala 9',
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()

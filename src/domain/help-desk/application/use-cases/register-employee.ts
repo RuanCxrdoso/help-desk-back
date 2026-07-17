@@ -18,6 +18,7 @@ export interface RegisterEmployeeUseCaseRequest {
   lastName: string
   email: string
   password: string
+  isActive: boolean
   department: string
   jobTitle: string
   location: string
