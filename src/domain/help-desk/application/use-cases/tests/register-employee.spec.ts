@@ -61,6 +61,9 @@ describe('Register Employee', () => {
       password: '123456',
       email: 'steveadams@email.com',
       tenantId: tenant.id.toString(),
+      department: 'Raio X e Imagens',
+      jobTitle: 'Tecnico em Radiografia',
+      location: '3 andar, sala 8',
     })
 
     expect(result.isRight()).toBeTruthy()
@@ -88,6 +91,9 @@ describe('Register Employee', () => {
       email: 'johndoe@email.com',
       password: '123456',
       tenantId: tenant.id.toString(),
+      department: 'Recepção',
+      jobTitle: 'Recepcionista',
+      location: 'Térreo principal',
     })
 
     expect(result.isLeft()).toBeTruthy()
@@ -117,6 +123,9 @@ describe('Register Employee', () => {
       email: EmailValueObject.create('jamesstewart@email.com'),
       password: '123456',
       tenantId: tenant.id,
+      department: 'Recepção',
+      jobTitle: 'Fichador',
+      location: 'Térreo principal',
     })
 
     await employeesRepository.create(employee)
@@ -128,6 +137,9 @@ describe('Register Employee', () => {
       email: 'jamesstewart@email.com',
       password: '123456',
       tenantId: tenant.id.toString(),
+      department: 'Recepção',
+      jobTitle: 'Recepcionista',
+      location: 'Térreo principal',
     })
 
     expect(result.isLeft()).toBeTruthy()
@@ -152,6 +164,9 @@ describe('Register Employee', () => {
       email: 'lamineyamal@email.com',
       password: '123456',
       tenantId: 'non-existing-tenant-id',
+      department: 'Farmácia',
+      jobTitle: 'Recepcionista',
+      location: '2 andar, sala 9',
     })
 
     expect(result.isLeft()).toBeTruthy()

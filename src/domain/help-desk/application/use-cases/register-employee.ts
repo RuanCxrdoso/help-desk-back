@@ -13,11 +13,14 @@ import { IUsersRepository } from '../repositories/users-repository'
 
 export interface RegisterEmployeeUseCaseRequest {
   creatorId: string
+  tenantId: string
   firstName: string
   lastName: string
   email: string
   password: string
-  tenantId: string
+  department: string
+  jobTitle: string
+  location: string
 }
 
 export type RegisterEmployeeUseCaseResponse = Either<

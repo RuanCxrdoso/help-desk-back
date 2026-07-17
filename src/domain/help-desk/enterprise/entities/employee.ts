@@ -5,6 +5,9 @@ import { User, UserProps } from './user'
 
 export interface EmployeeProps extends UserProps {
   role: ROLE.EMPLOYEE
+  department: string
+  jobTitle: string
+  location: string
 }
 
 export class Employee extends User<EmployeeProps> {
