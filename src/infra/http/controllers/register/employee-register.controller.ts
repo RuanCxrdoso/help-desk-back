@@ -32,7 +32,7 @@ const registerEmployeeBodySchema = z.object({
   location: z.string().min(1, 'Location is required'),
 })
 
-type RegisterEmployeeBodySchema = z.infer<typeof registerEmployeeBodySchema>
+type RegisterEmployeeBodyType = z.infer<typeof registerEmployeeBodySchema>
 
 const registerEmployeePipe = new ZodValidationPipe(registerEmployeeBodySchema)
 
@@ -47,7 +47,7 @@ export class EmployeeRegisterController {
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability) => ability.can(Action.Manage, 'User'))
   async handle(
-    @Body(registerEmployeePipe) body: RegisterEmployeeBodySchema,
+    @Body(registerEmployeePipe) body: RegisterEmployeeBodyType,
     @User() user: TokenPayload,
   ) {
     const {
