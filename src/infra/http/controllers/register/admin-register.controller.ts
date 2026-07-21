@@ -1,4 +1,4 @@
-import { RegisterEmployeeUseCase } from '@/domain/help-desk/application/use-cases/register-employee'
+import { RegisterAdminUseCase } from '@/domain/help-desk/application/use-cases/register-admin'
 import {
   Body,
   ConflictException,
@@ -10,44 +10,43 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common'
-import { ZodValidationPipe } from '../../utils/pipes/zod-validation.pipe'
+import { PoliciesGuard } from '../../auth/casl/policies.guard'
+import { CheckPolicies } from '../../auth/casl/check-policies.decorator'
+import { Action } from '../../auth/casl/action'
 import z from 'zod'
+import { ZodValidationPipe } from '../../utils/pipes/zod-validation.pipe'
 import { User } from '../../utils/decorators/user.decorator'
 import { type TokenPayload } from '../../auth/jwt.strategy'
 import { NotAllowedError } from '@/domain/help-desk/application/errors/not-allowed-error'
 import { UserAlreadyExistsError } from '@/domain/help-desk/application/errors/user-already-exists-error'
 import { NotFoundError } from '@/domain/help-desk/application/errors/not-found-error'
-import { PoliciesGuard } from '../../auth/casl/policies.guard'
-import { CheckPolicies } from '../../auth/casl/check-policies.decorator'
-import { Action } from '../../auth/casl/action'
 
-const registerEmployeeBodySchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  email: z.email('Invalid email format'),
-  password: z.string().min(6, 'Password must contain at least 6 characters'),
+const adminRegisterBodySchema = z.object({
+  firstName: z.string().min(2, { error: 'First name must be provided' }),
+  lastName: z.string().min(2, { error: 'Last name must be provided' }),
+  email: z.email().min(1, { error: 'E-mail must be provided' }),
+  password: z
+    .string()
+    .min(6, { error: 'Password must be at least six characters' }),
+  department: z.string().min(1, { error: 'Department must be provided' }),
+  jobTitle: z.string().min(1, { error: 'Job title must be provided' }),
   isActive: z.boolean().optional().default(true),
-  department: z.string().min(1, 'Department is required'),
-  jobTitle: z.string().min(1, 'Job title is required'),
-  location: z.string().min(1, 'Location is required'),
 })
 
-type RegisterEmployeeBodyType = z.infer<typeof registerEmployeeBodySchema>
+type AdminRegisterBodyType = z.infer<typeof adminRegisterBodySchema>
 
-const registerEmployeePipe = new ZodValidationPipe(registerEmployeeBodySchema)
+const adminRegisterBodyPipe = new ZodValidationPipe(adminRegisterBodySchema)
 
-@Controller('/employees')
-export class EmployeeRegisterController {
-  constructor(
-    private readonly registerEmployeeUseCase: RegisterEmployeeUseCase,
-  ) {}
+@Controller('/admins')
+export class AdminRegisterController {
+  constructor(private readonly registerAdminUseCase: RegisterAdminUseCase) {}
 
   @Post('/register')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability) => ability.can(Action.Manage, 'User'))
+  @CheckPolicies((ability) => ability.can(Action.Create, 'User'))
   async handle(
-    @Body(registerEmployeePipe) body: RegisterEmployeeBodyType,
+    @Body(adminRegisterBodyPipe) body: AdminRegisterBodyType,
     @User() user: TokenPayload,
   ) {
     const {
@@ -55,25 +54,22 @@ export class EmployeeRegisterController {
       lastName,
       email,
       password,
-      isActive,
       department,
       jobTitle,
-      location,
+      isActive,
     } = body
-
     const { sub, tenantId } = user
 
-    const result = await this.registerEmployeeUseCase.execute({
+    const result = await this.registerAdminUseCase.execute({
       creatorId: sub,
+      tenantId,
       firstName,
       lastName,
       email,
       password,
-      isActive: isActive ?? true,
-      tenantId,
       department,
       jobTitle,
-      location,
+      isActive,
     })
 
     if (result.isLeft()) {
@@ -92,7 +88,7 @@ export class EmployeeRegisterController {
     }
 
     return {
-      message: 'Employee was successfully created.',
+      message: 'Administrator was successfully created.',
     }
   }
 }

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   HttpCode,
+  HttpStatus,
   Post,
   UnauthorizedException,
 } from '@nestjs/common'
@@ -33,7 +34,7 @@ export class AuthenticateSuperAdminController {
   ) {}
 
   @Post('/super-admin/login')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Public()
   async handle(
     @Body(authenticateSuperAdminBodyPipe) body: AuthenticateSuperAdminBodyType,

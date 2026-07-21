@@ -5,9 +5,23 @@ import { User, UserProps } from './user'
 
 export interface AdminProps extends UserProps {
   role: ROLE.ADMIN
+  department: string
+  jobTitle: string
 }
 
 export class Admin extends User<AdminProps> {
+  get role() {
+    return this.props.role
+  }
+
+  get department() {
+    return this.props.department
+  }
+
+  get jobTitle() {
+    return this.props.jobTitle
+  }
+
   static create(
     props: Optional<AdminProps, 'createdAt' | 'updatedAt' | 'role'>,
     id?: UniqueEntityID,
