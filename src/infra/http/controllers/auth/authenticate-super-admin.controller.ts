@@ -51,7 +51,7 @@ export class AuthenticateSuperAdminController {
 
       switch (error.constructor) {
         case InvalidCredentialsError:
-          throw new UnauthorizedException('Invalid credentials.')
+          throw new UnauthorizedException(error.message)
         default:
           throw new UnauthorizedException(error.message)
       }

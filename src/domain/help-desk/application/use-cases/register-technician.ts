@@ -13,11 +13,14 @@ import { IUsersRepository } from '../repositories/users-repository'
 
 export interface RegisterTechnicianUseCaseRequest {
   creatorId: string
+  tenantId: string
   firstName: string
   lastName: string
   email: string
   password: string
-  tenantId: string
+  isActive: boolean
+  supportLevel: number
+  specialties: string[]
 }
 
 export type RegisterTechnicianUseCaseResponse = Either<

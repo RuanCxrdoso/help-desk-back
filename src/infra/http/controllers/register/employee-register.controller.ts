@@ -21,7 +21,7 @@ import { PoliciesGuard } from '../../auth/casl/policies.guard'
 import { CheckPolicies } from '../../auth/casl/check-policies.decorator'
 import { Action } from '../../auth/casl/action'
 
-const registerEmployeeBodySchema = z.object({
+const employeeRegisterBodySchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   email: z.email('Invalid email format'),
@@ -32,9 +32,9 @@ const registerEmployeeBodySchema = z.object({
   location: z.string().min(1, 'Location is required'),
 })
 
-type RegisterEmployeeBodyType = z.infer<typeof registerEmployeeBodySchema>
+type EmployeeRegisterBodyType = z.infer<typeof employeeRegisterBodySchema>
 
-const registerEmployeePipe = new ZodValidationPipe(registerEmployeeBodySchema)
+const registerEmployeePipe = new ZodValidationPipe(employeeRegisterBodySchema)
 
 @Controller('/employees')
 export class EmployeeRegisterController {
@@ -47,7 +47,7 @@ export class EmployeeRegisterController {
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability) => ability.can(Action.Manage, 'User'))
   async handle(
-    @Body(registerEmployeePipe) body: RegisterEmployeeBodyType,
+    @Body(registerEmployeePipe) body: EmployeeRegisterBodyType,
     @User() user: TokenPayload,
   ) {
     const {
