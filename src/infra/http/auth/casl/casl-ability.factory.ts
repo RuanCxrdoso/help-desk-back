@@ -41,11 +41,13 @@ export class CaslAbilityFactory {
 
     if (user.role === ROLE.ADMIN) {
       can(Manage, 'User', { tenantId: user.tenantId })
-      can(Manage, 'Tenant', { id: user.tenantId })
+
+      can(Read, 'Tenant', { id: user.tenantId })
+      can(Update, 'Tenant', { id: user.tenantId })
+
       can(Manage, 'Ticket', { tenantId: user.tenantId })
 
       cannot(Delete, 'User', { tenantId: user.tenantId, id: user.sub })
-      cannot(Delete, 'Tenant', { id: user.tenantId })
     }
 
     if (user.role === ROLE.TECHNICIAN) {
