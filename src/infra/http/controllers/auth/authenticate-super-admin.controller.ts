@@ -1,16 +1,8 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  UnauthorizedException,
-} from '@nestjs/common'
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common'
 import { Public } from '../../auth/public.decorator'
 import z from 'zod'
 import { ZodValidationPipe } from '../../utils/pipes/zod-validation.pipe'
 import { AuthenticateSuperAdminUseCase } from '@/domain/help-desk/application/use-cases/authenticate-super-admin'
-import { InvalidCredentialsError } from '@/domain/help-desk/application/errors/invalid-credentials-error'
 
 const authenticateSuperAdminSchema = z.object({
   email: z.email().min(1, { error: 'E-mail must be provided.' }),
@@ -47,14 +39,7 @@ export class AuthenticateSuperAdminController {
     })
 
     if (result.isLeft()) {
-      const error = result.value
-
-      switch (error.constructor) {
-        case InvalidCredentialsError:
-          throw new UnauthorizedException(error.message)
-        default:
-          throw new UnauthorizedException(error.message)
-      }
+      throw result.value
     }
 
     const accessToken = result.value.accessToken

@@ -6,14 +6,11 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  UnauthorizedException,
 } from '@nestjs/common'
 import { Public } from '../../auth/public.decorator'
 import z from 'zod'
 import { ZodValidationPipe } from '../../utils/pipes/zod-validation.pipe'
 import { AuthenticateUseCase } from '@/domain/help-desk/application/use-cases/authenticate'
-import { NotFoundError } from '@/domain/help-desk/application/errors/not-found-error'
-import { InvalidCredentialsError } from '@/domain/help-desk/application/errors/invalid-credentials-error'
 
 const authenticateBodySchema = z.object({
   email: z.email().min(1, { error: 'E-mail must be provided.' }),
@@ -50,16 +47,7 @@ export class AuthenticateController {
     })
 
     if (result.isLeft()) {
-      const error = result.value
-
-      switch (result.value.constructor) {
-        case NotFoundError:
-          throw new UnauthorizedException('Invalid credentials.')
-        case InvalidCredentialsError:
-          throw new UnauthorizedException('Invalid credentials.')
-        default:
-          throw new UnauthorizedException(error.message)
-      }
+      throw result.value
     }
 
     const { accessToken } = result.value

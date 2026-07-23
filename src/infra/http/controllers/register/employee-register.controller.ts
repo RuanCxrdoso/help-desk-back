@@ -1,12 +1,9 @@
 import { RegisterEmployeeUseCase } from '@/domain/help-desk/application/use-cases/register-employee'
 import {
   Body,
-  ConflictException,
   Controller,
-  ForbiddenException,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Post,
   UseGuards,
 } from '@nestjs/common'
@@ -14,9 +11,6 @@ import { ZodValidationPipe } from '../../utils/pipes/zod-validation.pipe'
 import z from 'zod'
 import { User } from '../../utils/decorators/user.decorator'
 import { type TokenPayload } from '../../auth/jwt.strategy'
-import { NotAllowedError } from '@/domain/help-desk/application/errors/not-allowed-error'
-import { UserAlreadyExistsError } from '@/domain/help-desk/application/errors/user-already-exists-error'
-import { NotFoundError } from '@/domain/help-desk/application/errors/not-found-error'
 import { PoliciesGuard } from '../../auth/casl/policies.guard'
 import { CheckPolicies } from '../../auth/casl/check-policies.decorator'
 import { Action } from '../../auth/casl/action'
@@ -77,18 +71,7 @@ export class EmployeeRegisterController {
     })
 
     if (result.isLeft()) {
-      const error = result.value
-
-      switch (error.constructor) {
-        case NotAllowedError:
-          throw new ForbiddenException(error.message)
-        case UserAlreadyExistsError:
-          throw new ConflictException(error.message)
-        case NotFoundError:
-          throw new NotFoundException(error.message)
-        default:
-          throw new ConflictException(error.message)
-      }
+      throw result.value
     }
 
     return {

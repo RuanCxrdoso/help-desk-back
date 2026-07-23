@@ -1,8 +1,6 @@
 import { RegisterTenantAndAdminUseCase } from '@/domain/help-desk/application/use-cases/register-tenant-and-admin'
 import {
-  BadRequestException,
   Body,
-  ConflictException,
   Controller,
   HttpCode,
   HttpStatus,
@@ -14,7 +12,6 @@ import { CheckPolicies } from '../../auth/casl/check-policies.decorator'
 import { Action } from '../../auth/casl/action'
 import z from 'zod'
 import { ZodValidationPipe } from '../../utils/pipes/zod-validation.pipe'
-import { TenantAlreadyExistsError } from '@/domain/help-desk/application/errors/tenant-already-exists-error'
 import { TENANT_STATUS } from '@/core/enums/tenant_status'
 
 const tenantAndAdminRegisterBodySchema = z.object({
@@ -72,14 +69,7 @@ export class TenantAndAdminRegisterController {
     })
 
     if (result.isLeft()) {
-      const error = result.value
-
-      switch (error.constructor) {
-        case TenantAlreadyExistsError:
-          throw new ConflictException(error.message)
-        default:
-          throw new BadRequestException(error.message)
-      }
+      throw result.value
     }
 
     return {

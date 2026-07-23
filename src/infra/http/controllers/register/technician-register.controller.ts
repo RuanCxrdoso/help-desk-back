@@ -1,12 +1,9 @@
 import { RegisterTechnicianUseCase } from '@/domain/help-desk/application/use-cases/register-technician'
 import {
   Body,
-  ConflictException,
   Controller,
-  ForbiddenException,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Post,
   UseGuards,
 } from '@nestjs/common'
@@ -17,9 +14,6 @@ import z from 'zod'
 import { ZodValidationPipe } from '../../utils/pipes/zod-validation.pipe'
 import { User } from '../../utils/decorators/user.decorator'
 import { type TokenPayload } from '../../auth/jwt.strategy'
-import { NotAllowedError } from '@/domain/help-desk/application/errors/not-allowed-error'
-import { UserAlreadyExistsError } from '@/domain/help-desk/application/errors/user-already-exists-error'
-import { NotFoundError } from '@/domain/help-desk/application/errors/not-found-error'
 
 const technicianRegisterBodySchema = z.object({
   firstName: z.string().min(2, { error: 'First name must be provided' }),
@@ -83,18 +77,7 @@ export class TechnicianRegisterController {
     })
 
     if (result.isLeft()) {
-      const error = result.value
-
-      switch (error.constructor) {
-        case NotAllowedError:
-          throw new ForbiddenException(error.message)
-        case UserAlreadyExistsError:
-          throw new ConflictException(error.message)
-        case NotFoundError:
-          throw new NotFoundException(error.message)
-        default:
-          throw new ConflictException(error.message)
-      }
+      throw result.value
     }
 
     return {
