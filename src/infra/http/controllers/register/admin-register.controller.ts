@@ -33,7 +33,7 @@ const adminRegisterBodySchema = z.object({
   isActive: z.boolean().optional().default(true),
 })
 
-type AdminRegisterBodyType = z.infer<typeof adminRegisterBodySchema>
+type AdminRegisterBodyDTO = z.infer<typeof adminRegisterBodySchema>
 
 const adminRegisterBodyPipe = new ZodValidationPipe(adminRegisterBodySchema)
 
@@ -46,7 +46,7 @@ export class AdminRegisterController {
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability) => ability.can(Action.Create, 'User'))
   async handle(
-    @Body(adminRegisterBodyPipe) body: AdminRegisterBodyType,
+    @Body(adminRegisterBodyPipe) body: AdminRegisterBodyDTO,
     @User() user: TokenPayload,
   ) {
     const {

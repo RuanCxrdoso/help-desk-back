@@ -19,7 +19,7 @@ const authenticateSuperAdminSchema = z.object({
     .min(6, { error: 'Password must have at least 6 characters.' }),
 })
 
-type AuthenticateSuperAdminBodyType = z.infer<
+type AuthenticateSuperAdminBodyDTO = z.infer<
   typeof authenticateSuperAdminSchema
 >
 
@@ -37,7 +37,7 @@ export class AuthenticateSuperAdminController {
   @HttpCode(HttpStatus.OK)
   @Public()
   async handle(
-    @Body(authenticateSuperAdminBodyPipe) body: AuthenticateSuperAdminBodyType,
+    @Body(authenticateSuperAdminBodyPipe) body: AuthenticateSuperAdminBodyDTO,
   ) {
     const { email, password } = body
 

@@ -38,7 +38,7 @@ const technicianRegisterBodySchema = z.object({
   ),
 })
 
-type TechnicianRegisterBodyType = z.infer<typeof technicianRegisterBodySchema>
+type TechnicianRegisterBodyDTO = z.infer<typeof technicianRegisterBodySchema>
 
 const technicianRegisterBodyPipe = new ZodValidationPipe(
   technicianRegisterBodySchema,
@@ -55,7 +55,7 @@ export class TechnicianRegisterController {
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability) => ability.can(Action.Create, 'User'))
   async handle(
-    @Body(technicianRegisterBodyPipe) body: TechnicianRegisterBodyType,
+    @Body(technicianRegisterBodyPipe) body: TechnicianRegisterBodyDTO,
     @User() user: TokenPayload,
   ) {
     const {

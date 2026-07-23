@@ -22,7 +22,7 @@ const authenticateBodySchema = z.object({
     .min(6, { error: 'Password must be at least 6 characters.' }),
 })
 
-type AuthenticateBodyType = z.infer<typeof authenticateBodySchema>
+type AuthenticateBodyDTO = z.infer<typeof authenticateBodySchema>
 
 const authenticateBodyPipe = new ZodValidationPipe(authenticateBodySchema)
 
@@ -34,7 +34,7 @@ export class AuthenticateController {
   @Public()
   @HttpCode(HttpStatus.OK)
   async handle(
-    @Body(authenticateBodyPipe) body: AuthenticateBodyType,
+    @Body(authenticateBodyPipe) body: AuthenticateBodyDTO,
     @Headers('x-tenant-slug') tenantSlug: string,
   ) {
     if (!tenantSlug) {
