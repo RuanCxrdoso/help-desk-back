@@ -17,13 +17,16 @@ import { Action } from '../../auth/casl/action'
 import {
   HttpAdminProfilePresenter,
   HttpEmployeeProfilePresenter,
+  HttpSuperAdminProfilePresenter,
   HttpTechnicianProfilePresenter,
 } from '@/infra/presenters/http-profile.presenter'
 import { NotAllowedError } from '@/domain/help-desk/application/errors/not-allowed-error'
+import { GetSuperAdminProfileUseCase } from '@/domain/help-desk/application/use-cases/get-super-admin-profile'
 
 @Controller()
 export class GetProfileController {
   constructor(
+    private readonly getSuperAdminProfileUseCase: GetSuperAdminProfileUseCase,
     private readonly getAdminProfileUseCase: GetAdminProfileUseCase,
     private readonly getTechnicianProfileUseCase: GetTechnicianProfileUseCase,
     private readonly getEmployeeProfileUseCase: GetEmployeeProfileUseCase,
@@ -34,13 +37,25 @@ export class GetProfileController {
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability) => ability.can(Action.Read, 'User'))
   async handle(@User() user: TokenPayload) {
-    const { sub: id, tenantId, role } = user
+    const { sub: id, role } = user
 
     switch (role) {
+      case ROLE.SUPER_ADMIN: {
+        const result = await this.getSuperAdminProfileUseCase.execute({
+          id,
+          role,
+        })
+
+        if (result.isLeft()) throw result.value
+
+        const superAdminDomain = result.value.superAdmin
+
+        return HttpSuperAdminProfilePresenter.toHttp(superAdminDomain)
+      }
       case ROLE.ADMIN: {
         const result = await this.getAdminProfileUseCase.execute({
           id,
-          tenantId,
+          tenantId: user.tenantId,
           role,
         })
 
@@ -53,7 +68,7 @@ export class GetProfileController {
       case ROLE.TECHNICIAN: {
         const result = await this.getTechnicianProfileUseCase.execute({
           id,
-          tenantId,
+          tenantId: user.tenantId,
           role,
         })
 
@@ -66,7 +81,7 @@ export class GetProfileController {
       case ROLE.EMPLOYEE: {
         const result = await this.getEmployeeProfileUseCase.execute({
           id,
-          tenantId,
+          tenantId: user.tenantId,
           role,
         })
 
@@ -77,7 +92,7 @@ export class GetProfileController {
         return HttpEmployeeProfilePresenter.toHttp(employeeDomain)
       }
       default: {
-        throw new NotAllowedError()
+        throw new NotAllowedError('Invalid role.')
       }
     }
   }
