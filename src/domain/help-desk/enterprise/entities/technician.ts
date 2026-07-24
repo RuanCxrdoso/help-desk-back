@@ -5,9 +5,19 @@ import { User, UserProps } from './user'
 
 export interface TechnicianProps extends UserProps {
   role: ROLE.TECHNICIAN
+  supportLevel: number
+  specialties: string[]
 }
 
 export class Technician extends User<TechnicianProps> {
+  get supportLevel() {
+    return this.props.supportLevel
+  }
+
+  get specialties() {
+    return this.props.specialties
+  }
+
   static create(
     props: Optional<TechnicianProps, 'createdAt' | 'updatedAt' | 'role'>,
     id?: UniqueEntityID,
