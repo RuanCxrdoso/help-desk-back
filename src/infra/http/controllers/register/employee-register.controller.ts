@@ -14,6 +14,7 @@ import { type TokenPayload } from '../../auth/jwt.strategy'
 import { PoliciesGuard } from '../../auth/casl/policies.guard'
 import { CheckPolicies } from '../../auth/casl/check-policies.decorator'
 import { Action } from '../../auth/casl/action'
+import { NotAllowedError } from '@/domain/help-desk/application/errors/not-allowed-error'
 
 const employeeRegisterBodySchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -55,16 +56,22 @@ export class EmployeeRegisterController {
       location,
     } = body
 
-    const { sub, tenantId } = user
+    const { sub } = user
+
+    if (!user.tenantId) {
+      throw new NotAllowedError(
+        'A tenant context is required to register an employee.',
+      )
+    }
 
     const result = await this.registerEmployeeUseCase.execute({
       creatorId: sub,
+      tenantId: user.tenantId,
       firstName,
       lastName,
       email,
       password,
       isActive: isActive ?? true,
-      tenantId,
       department,
       jobTitle,
       location,

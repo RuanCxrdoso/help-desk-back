@@ -13,6 +13,7 @@ export const userTokenPayloadSchema = z.object({
 
 export const superAdminTokenPayloadSchema = z.object({
   sub: z.uuid(),
+  tenantId: z.uuid().optional(),
   role: z.literal(ROLE.SUPER_ADMIN),
 })
 
