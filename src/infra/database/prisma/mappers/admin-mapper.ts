@@ -1,25 +1,45 @@
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { Admin } from '@/domain/help-desk/enterprise/entities/admin'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
-import { User } from 'generated/prisma/client'
+import { AdminProfile, User } from 'generated/prisma/client'
 import { ROLE } from 'generated/prisma/enums'
-import { UserUncheckedCreateInput } from 'generated/prisma/models'
+import { UserCreateInput } from 'generated/prisma/models'
+
+type PrismaAdminWithProfile = User & {
+  adminProfile: AdminProfile | null
+}
 
 export class AdminMapper {
-  public static toPrisma(raw: Admin): UserUncheckedCreateInput {
+  public static toPrisma(raw: Admin): UserCreateInput {
     return {
       id: raw.id.toString(),
-      tenantId: raw.tenantId.toString(),
       role: ROLE.ADMIN,
       firstName: raw.firstName,
       lastName: raw.lastName,
       email: raw.email.value,
       password: raw.password,
+      isActive: raw.isActive,
       createdAt: raw.createdAt,
+      deletedAt: raw.deletedAt,
+      tenant: {
+        connect: {
+          id: raw.tenantId.toString(),
+        },
+      },
+      adminProfile: {
+        create: {
+          department: raw.department,
+          jobTitle: raw.jobTitle,
+        },
+      },
     }
   }
 
-  public static toDomain(raw: User): Admin {
+  public static toDomain(raw: PrismaAdminWithProfile): Admin {
+    if (!raw.adminProfile) {
+      throw new Error('Admin profile relation is not loaded.')
+    }
+
     return Admin.create(
       {
         tenantId: new UniqueEntityID(raw.tenantId),
@@ -27,8 +47,12 @@ export class AdminMapper {
         lastName: raw.lastName,
         email: EmailValueObject.create(raw.email),
         password: raw.password,
+        department: raw.adminProfile?.department,
+        jobTitle: raw.adminProfile?.jobTitle,
+        isActive: raw.isActive,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
+        deletedAt: raw.deletedAt,
       },
       new UniqueEntityID(raw.id),
     )
