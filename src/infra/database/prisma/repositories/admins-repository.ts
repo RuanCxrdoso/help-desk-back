@@ -29,7 +29,7 @@ export class PrismaAdminsRepository implements IAdminsRepository {
       },
     })
 
-    if (!admin) return null
+    if (!admin || !admin.adminProfile) return null
 
     return AdminMapper.toDomain(admin)
   }

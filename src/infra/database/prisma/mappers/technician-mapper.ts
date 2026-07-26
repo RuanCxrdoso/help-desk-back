@@ -3,14 +3,14 @@ import { Technician } from '@/domain/help-desk/enterprise/entities/technician'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
 import { TechnicianProfile, User } from 'generated/prisma/client'
 import { ROLE } from 'generated/prisma/enums'
-import { UserCreateInput } from 'generated/prisma/models'
+import { UserCreateInput, UserUpdateInput } from 'generated/prisma/models'
 
 type PrismaTechnicianWithProfile = User & {
   technicianProfile: TechnicianProfile | null
 }
 
 export class TechnicianMapper {
-  public static toPrisma(raw: Technician): UserCreateInput {
+  public static toPrismaUser(raw: Technician): UserCreateInput {
     return {
       id: raw.id.toString(),
       firstName: raw.firstName,
@@ -27,6 +27,34 @@ export class TechnicianMapper {
       },
       technicianProfile: {
         create: {
+          supportLevel: raw.supportLevel,
+          specialties: raw.specialties,
+        },
+      },
+    }
+  }
+
+  public static toPrismaUpdate(raw: Technician): UserUpdateInput {
+    return {
+      id: raw.id.toString(),
+      firstName: raw.firstName,
+      lastName: raw.lastName,
+      email: raw.email.value,
+      password: raw.password,
+      role: ROLE.TECHNICIAN,
+      createdAt: raw.createdAt,
+      deletedAt: raw.deletedAt,
+      tenant: {
+        connect: {
+          id: raw.tenantId.toString(),
+        },
+      },
+      technicianProfile: {
+        create: {
+          supportLevel: raw.supportLevel,
+          specialties: raw.specialties,
+        },
+        update: {
           supportLevel: raw.supportLevel,
           specialties: raw.specialties,
         },

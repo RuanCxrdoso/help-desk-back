@@ -9,7 +9,7 @@ export class PrismaTechniciansRepository implements ITechniciansRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(user: Technician): Promise<void> {
-    const technicianPrisma = TechnicianMapper.toPrisma(user)
+    const technicianPrisma = TechnicianMapper.toPrismaUser(user)
 
     await this.prisma.user.create({
       data: technicianPrisma,
@@ -22,9 +22,12 @@ export class PrismaTechniciansRepository implements ITechniciansRepository {
         id,
         tenantId,
       },
+      include: {
+        technicianProfile: true,
+      },
     })
 
-    if (!technician) return null
+    if (!technician || !technician.technicianProfile) return null
 
     return TechnicianMapper.toDomain(technician)
   }
