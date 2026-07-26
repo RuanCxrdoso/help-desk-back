@@ -3,14 +3,14 @@ import { Employee } from '@/domain/help-desk/enterprise/entities/employee'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
 import { EmployeeProfile, User } from 'generated/prisma/client'
 import { ROLE } from 'generated/prisma/enums'
-import { UserCreateInput } from 'generated/prisma/models'
+import { UserCreateInput, UserUpdateInput } from 'generated/prisma/models'
 
 type PrismaEmployeeWithProfile = User & {
   employeeProfile: EmployeeProfile | null
 }
 
 export class EmployeeMapper {
-  public static toPrisma(raw: Employee): UserCreateInput {
+  public static toPrismaUser(raw: Employee): UserCreateInput {
     return {
       id: raw.id.toString(),
       firstName: raw.firstName,
@@ -28,6 +28,37 @@ export class EmployeeMapper {
       },
       employeeProfile: {
         create: {
+          department: raw.department,
+          jobTitle: raw.jobTitle,
+          location: raw.location,
+        },
+      },
+    }
+  }
+
+  public static toPrismaUpdate(raw: Employee): UserUpdateInput {
+    return {
+      id: raw.id.toString(),
+      firstName: raw.firstName,
+      lastName: raw.lastName,
+      email: raw.email.value,
+      password: raw.password,
+      role: ROLE.EMPLOYEE,
+      isActive: raw.isActive,
+      createdAt: raw.createdAt,
+      deletedAt: raw.deletedAt,
+      tenant: {
+        connect: {
+          id: raw.tenantId.toString(),
+        },
+      },
+      employeeProfile: {
+        create: {
+          department: raw.department,
+          jobTitle: raw.jobTitle,
+          location: raw.location,
+        },
+        update: {
           department: raw.department,
           jobTitle: raw.jobTitle,
           location: raw.location,

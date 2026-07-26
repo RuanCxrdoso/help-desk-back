@@ -3,6 +3,7 @@ import { Admin } from '@/domain/help-desk/enterprise/entities/admin'
 import { PrismaService } from '../prisma.service'
 import { Injectable } from '@nestjs/common'
 import { AdminMapper } from '../mappers/admin-mapper'
+import { ROLE } from 'generated/prisma/enums'
 
 @Injectable()
 export class PrismaAdminsRepository implements IAdminsRepository {
@@ -21,6 +22,7 @@ export class PrismaAdminsRepository implements IAdminsRepository {
       where: {
         id,
         tenantId,
+        role: ROLE.ADMIN,
       },
       include: {
         adminProfile: true,

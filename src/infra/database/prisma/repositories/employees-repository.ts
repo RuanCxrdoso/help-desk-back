@@ -10,7 +10,7 @@ export class PrismaEmployeesRepository implements IEmployeesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(user: Employee): Promise<void> {
-    const employeePrisma = EmployeeMapper.toPrisma(user)
+    const employeePrisma = EmployeeMapper.toPrismaUser(user)
 
     await this.prisma.user.create({
       data: employeePrisma,
