@@ -1,19 +1,14 @@
 import { IUsersRepository } from '@/domain/help-desk/application/repositories/users-repository'
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from '../prisma.service'
-import { User } from '@/domain/help-desk/enterprise/entities/user'
-import { AdminMapper } from '../mappers/admin-mapper'
-import { EmployeeMapper } from '../mappers/employee-mapper'
-import { TechnicianMapper } from '../mappers/technician-mapper'
+import { AuthUser } from '@/domain/help-desk/enterprise/entities/auth-user'
+import { AuthUserMapper } from '../mappers/auth-user-mapper'
 
 @Injectable()
 export class PrismaUsersRepository implements IUsersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByEmail(
-    email: string,
-    tenantId: string,
-  ): Promise<User<any> | null> {
+  async findByEmail(email: string, tenantId: string): Promise<AuthUser | null> {
     const user = await this.prisma.user.findFirst({
       where: {
         email,
@@ -23,9 +18,13 @@ export class PrismaUsersRepository implements IUsersRepository {
 
     if (!user) return null
 
-    if (user.role === 'ADMIN') return AdminMapper.toDomain(user)
-    if (user.role === 'EMPLOYEE') return EmployeeMapper.toDomain(user)
-    if (user.role === 'TECHNICIAN') return TechnicianMapper.toDomain(user)
+    if (
+      user.role === 'ADMIN' ||
+      user.role === 'EMPLOYEE' ||
+      user.role === 'TECHNICIAN'
+    ) {
+      return AuthUserMapper.toDomain(user)
+    }
 
     return null
   }
