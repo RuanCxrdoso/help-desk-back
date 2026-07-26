@@ -3,14 +3,14 @@ import { Admin } from '@/domain/help-desk/enterprise/entities/admin'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
 import { AdminProfile, User } from 'generated/prisma/client'
 import { ROLE } from 'generated/prisma/enums'
-import { UserCreateInput } from 'generated/prisma/models'
+import { UserCreateInput, UserUpdateInput } from 'generated/prisma/models'
 
 type PrismaAdminWithProfile = User & {
   adminProfile: AdminProfile | null
 }
 
 export class AdminMapper {
-  public static toPrisma(raw: Admin): UserCreateInput {
+  public static toPrismaUser(raw: Admin): UserCreateInput {
     return {
       id: raw.id.toString(),
       role: ROLE.ADMIN,
@@ -20,6 +20,7 @@ export class AdminMapper {
       password: raw.password,
       isActive: raw.isActive,
       createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt ?? undefined,
       deletedAt: raw.deletedAt,
       tenant: {
         connect: {
@@ -28,6 +29,36 @@ export class AdminMapper {
       },
       adminProfile: {
         create: {
+          department: raw.department,
+          jobTitle: raw.jobTitle,
+        },
+      },
+    }
+  }
+
+  public static toPrismaUpdate(raw: Admin): UserUpdateInput {
+    return {
+      id: raw.id.toString(),
+      role: ROLE.ADMIN,
+      firstName: raw.firstName,
+      lastName: raw.lastName,
+      email: raw.email.value,
+      password: raw.password,
+      isActive: raw.isActive,
+      createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt ?? undefined,
+      deletedAt: raw.deletedAt,
+      tenant: {
+        connect: {
+          id: raw.tenantId.toString(),
+        },
+      },
+      adminProfile: {
+        create: {
+          department: raw.department,
+          jobTitle: raw.jobTitle,
+        },
+        update: {
           department: raw.department,
           jobTitle: raw.jobTitle,
         },
