@@ -40,16 +40,20 @@ describe('Register Employee', () => {
   it('should be able to register an employee', async () => {
     const tenant = Tenant.create({
       name: 'Acme corp',
+      status: 'ACTIVE',
     })
 
     tenantsRepository.items.push(tenant)
 
     const admin = Admin.create({
+      tenantId: tenant.id,
       firstName: 'John',
       lastName: 'Doe',
       email: EmailValueObject.create('johndoe@email.com'),
       password: '123456',
-      tenantId: tenant.id,
+      isActive: true,
+      department: 'TI',
+      jobTitle: 'Administrador',
     })
 
     adminsRepository.items.push(admin)
@@ -61,6 +65,10 @@ describe('Register Employee', () => {
       password: '123456',
       email: 'steveadams@email.com',
       tenantId: tenant.id.toString(),
+      department: 'Raio X e Imagens',
+      jobTitle: 'Tecnico em Radiografia',
+      location: '3 andar, sala 8',
+      isActive: true,
     })
 
     expect(result.isRight()).toBeTruthy()
@@ -77,6 +85,7 @@ describe('Register Employee', () => {
   it('shouldn`t be able to register an employee without ADMIN role', async () => {
     const tenant = Tenant.create({
       name: 'Acme corp',
+      status: 'ACTIVE',
     })
 
     tenantsRepository.items.push(tenant)
@@ -88,6 +97,10 @@ describe('Register Employee', () => {
       email: 'johndoe@email.com',
       password: '123456',
       tenantId: tenant.id.toString(),
+      department: 'Recepção',
+      jobTitle: 'Recepcionista',
+      location: 'Térreo principal',
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()
@@ -97,16 +110,20 @@ describe('Register Employee', () => {
   it('shouldn`t be able to register an employee with same email', async () => {
     const tenant = Tenant.create({
       name: 'Acme corp',
+      status: 'ACTIVE',
     })
 
     tenantsRepository.items.push(tenant)
 
     const admin = Admin.create({
+      tenantId: tenant.id,
       firstName: 'John',
       lastName: 'Doe',
       email: EmailValueObject.create('johndoe@email.com'),
       password: '123456',
-      tenantId: tenant.id,
+      isActive: true,
+      department: 'TI',
+      jobTitle: 'Administrador',
     })
 
     await adminsRepository.create(admin)
@@ -117,6 +134,10 @@ describe('Register Employee', () => {
       email: EmailValueObject.create('jamesstewart@email.com'),
       password: '123456',
       tenantId: tenant.id,
+      department: 'Recepção',
+      jobTitle: 'Fichador',
+      location: 'Térreo principal',
+      isActive: true,
     })
 
     await employeesRepository.create(employee)
@@ -128,6 +149,10 @@ describe('Register Employee', () => {
       email: 'jamesstewart@email.com',
       password: '123456',
       tenantId: tenant.id.toString(),
+      department: 'Recepção',
+      jobTitle: 'Recepcionista',
+      location: 'Térreo principal',
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()
@@ -136,11 +161,14 @@ describe('Register Employee', () => {
 
   it('shouldn`t be able to register an employee if tenant doesn`t exists', async () => {
     const admin = Admin.create({
+      tenantId: new UniqueEntityID('non-existing-tenant-id'),
       firstName: 'John',
       lastName: 'Doe',
       email: EmailValueObject.create('johndoe@email.com'),
       password: '123456',
-      tenantId: new UniqueEntityID('non-existing-tenant-id'),
+      department: 'TI',
+      jobTitle: 'Administrador',
+      isActive: true,
     })
 
     adminsRepository.items.push(admin)
@@ -152,6 +180,10 @@ describe('Register Employee', () => {
       email: 'lamineyamal@email.com',
       password: '123456',
       tenantId: 'non-existing-tenant-id',
+      department: 'Farmácia',
+      jobTitle: 'Recepcionista',
+      location: '2 andar, sala 9',
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()

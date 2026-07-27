@@ -8,9 +8,11 @@ export interface UserProps {
   lastName: string
   email: EmailValueObject
   password: string
+  isActive: boolean
   role: ROLE
   createdAt: Date
   updatedAt?: Date | null
+  deletedAt?: Date | null
   tenantId: UniqueEntityID
 }
 
@@ -31,6 +33,10 @@ export abstract class User<Props extends UserProps> extends Entity<Props> {
     return this.props.password
   }
 
+  get isActive() {
+    return this.props.isActive
+  }
+
   get role() {
     return this.props.role
   }
@@ -41,6 +47,10 @@ export abstract class User<Props extends UserProps> extends Entity<Props> {
 
   get updatedAt() {
     return this.props.updatedAt
+  }
+
+  get deletedAt() {
+    return this.props.deletedAt
   }
 
   get tenantId() {

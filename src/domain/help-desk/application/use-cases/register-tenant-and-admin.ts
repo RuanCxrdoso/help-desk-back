@@ -7,17 +7,22 @@ import { Slug } from '../../enterprise/entities/value-objects/slug-value-object'
 import { Admin } from '../../enterprise/entities/admin'
 import { EmailValueObject } from '../../enterprise/entities/value-objects/email-value-object'
 import { IHashGenerator } from '../cryptography/hash-generator'
+import { TENANT_STATUS } from 'generated/prisma/enums'
 
 interface RegisterTenantAndAdminUseCaseRequest {
   tenant: {
     name: string
     slug: string
+    status: TENANT_STATUS
   }
   admin: {
     firstName: string
     lastName: string
     email: string
     password: string
+    department: string
+    jobTitle: string
+    isActive: boolean
   }
 }
 
@@ -44,6 +49,7 @@ export class RegisterTenantAndAdminUseCase {
     const newTenant = Tenant.create({
       name: tenant.name,
       slug: Slug.createFromText(tenant.slug),
+      status: tenant.status,
     })
 
     const adminHashedPassword = await this.hashGenerator.hash(admin.password)
@@ -54,6 +60,9 @@ export class RegisterTenantAndAdminUseCase {
       email: EmailValueObject.create(admin.email),
       password: adminHashedPassword,
       tenantId: newTenant.id,
+      department: admin.department,
+      jobTitle: admin.jobTitle,
+      isActive: admin.isActive,
     })
 
     await this.tenantAndAdminRegister.register(newTenant, tenantAdmin)

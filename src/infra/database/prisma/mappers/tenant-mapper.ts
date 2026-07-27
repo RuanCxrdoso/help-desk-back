@@ -8,9 +8,12 @@ export class TenantMapper {
   public static toPrisma(raw: TenantDomain): TenantUncheckedCreateInput {
     return {
       id: raw.id.toString(),
-      slug: raw.slug,
+      slug: raw.slug.toString(),
       name: raw.name,
+      status: raw.status,
       createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt ?? undefined,
+      deletedAt: raw.deletedAt,
     }
   }
 
@@ -19,8 +22,10 @@ export class TenantMapper {
       {
         slug: Slug.createFromText(raw.slug),
         name: raw.name,
+        status: raw.status,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
+        deletedAt: raw.deletedAt,
       },
       new UniqueEntityID(raw.id),
     )

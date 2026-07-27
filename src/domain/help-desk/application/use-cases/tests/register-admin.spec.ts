@@ -50,6 +50,7 @@ describe('Register Admin', () => {
     const tenant = Tenant.create(
       {
         name: 'Acme corp',
+        status: 'ACTIVE',
       },
       new UniqueEntityID('tenant-id-1'),
     )
@@ -58,11 +59,14 @@ describe('Register Admin', () => {
 
     const result = await sut.execute({
       creatorId: superAdmin.id.toString(),
+      tenantId: 'tenant-id-1',
       firstName: 'Steve',
       lastName: 'Adams',
       email: 'steveadams@email.com',
       password: '123456',
-      tenantId: 'tenant-id-1',
+      department: 'IT',
+      jobTitle: 'System Administrator',
+      isActive: true,
     })
 
     expect(result.isRight()).toBeTruthy()
@@ -79,17 +83,21 @@ describe('Register Admin', () => {
   it('shouldn`t be able to register an admin without SUPER ADMIN role', async () => {
     const tenant = Tenant.create({
       name: 'Acme corp',
+      status: 'ACTIVE',
     })
 
     tenantsRepository.items.push(tenant)
 
     const result = await sut.execute({
       creatorId: '241243124123',
+      tenantId: tenant.id.toString(),
       firstName: 'John',
       lastName: 'Doe',
       email: 'johndoe@email.com',
       password: '123456',
-      tenantId: tenant.id.toString(),
+      department: 'IT',
+      jobTitle: 'System Administrator',
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()
@@ -108,27 +116,34 @@ describe('Register Admin', () => {
 
     const tenant = Tenant.create({
       name: 'Acme corp',
+      status: 'ACTIVE',
     })
 
     tenantsRepository.items.push(tenant)
 
     const admin = Admin.create({
+      tenantId: tenant.id,
       firstName: 'John',
       lastName: 'Doe',
       email: EmailValueObject.create('steveadams@email.com'),
       password: '123456',
-      tenantId: tenant.id,
+      department: 'IT',
+      jobTitle: 'System Administrator',
+      isActive: true,
     })
 
     await adminsRepository.create(admin)
 
     const result = await sut.execute({
+      tenantId: tenant.id.toString(),
       creatorId: superAdmin.id.toString(),
       firstName: 'Steve',
       lastName: 'Adams',
       email: 'steveadams@email.com',
       password: '123456',
-      tenantId: tenant.id.toString(),
+      department: 'IT',
+      jobTitle: 'System Administrator',
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()
@@ -146,12 +161,15 @@ describe('Register Admin', () => {
     superAdminsRepository.items.push(superAdmin)
 
     const result = await sut.execute({
+      tenantId: 'tenant-id-1',
       creatorId: superAdmin.id.toString(),
       firstName: 'Steve',
       lastName: 'Adams',
       email: 'steveadams@email.com',
       password: '123456',
-      tenantId: 'tenant-id-1',
+      department: 'IT',
+      jobTitle: 'System Administrator',
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()

@@ -12,6 +12,7 @@ export function makeTenant(
   return Tenant.create(
     {
       name: faker.company.name(),
+      status: 'ACTIVE',
       ...override,
     },
     id,

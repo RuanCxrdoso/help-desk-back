@@ -3,12 +3,24 @@ import { PassportStrategy } from '@nestjs/passport'
 import { Injectable } from '@nestjs/common'
 import { EnvService } from '@/infra/env/env.service'
 import z from 'zod'
+import { ROLE } from '@/core/enums/role'
 
-export const tokenPayloadSchema = z.object({
+export const userTokenPayloadSchema = z.object({
   sub: z.uuid(),
   tenantId: z.uuid(),
-  role: z.enum(['EMPLOYEE', 'TECHNICIAN', 'ADMIN', 'SUPER_ADMIN']),
+  role: z.enum([ROLE.EMPLOYEE, ROLE.TECHNICIAN, ROLE.ADMIN]),
 })
+
+export const superAdminTokenPayloadSchema = z.object({
+  sub: z.uuid(),
+  tenantId: z.uuid().optional(),
+  role: z.literal(ROLE.SUPER_ADMIN),
+})
+
+export const tokenPayloadSchema = z.union([
+  userTokenPayloadSchema,
+  superAdminTokenPayloadSchema,
+])
 
 export type TokenPayload = z.infer<typeof tokenPayloadSchema>
 

@@ -37,12 +37,16 @@ describe('Register Tenant and Admin', () => {
       tenant: {
         name: 'Tenant 1',
         slug: 'tenant-1',
+        status: 'ACTIVE',
       },
       admin: {
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@example.com',
         password: 'password',
+        department: 'TI',
+        jobTitle: 'Administrador',
+        isActive: true,
       },
     })
 
@@ -66,12 +70,16 @@ describe('Register Tenant and Admin', () => {
       tenant: {
         name: 'Registed Tenant',
         slug: 'registerd-tenant',
+        status: 'ACTIVE',
       },
       admin: {
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@example.com',
         password: 'password',
+        department: 'TI',
+        jobTitle: 'Administrador',
+        isActive: true,
       },
     })
 
