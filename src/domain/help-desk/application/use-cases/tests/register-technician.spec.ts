@@ -41,6 +41,7 @@ describe('Register Technician', () => {
     const tenant = Tenant.create(
       {
         name: 'Acme corp',
+        status: 'ACTIVE',
       },
       new UniqueEntityID(),
     )
@@ -53,6 +54,9 @@ describe('Register Technician', () => {
       email: EmailValueObject.create('johndoe@email.com'),
       password: '123456',
       tenantId: tenant.id,
+      department: 'TI',
+      jobTitle: 'Administrador',
+      isActive: true,
     })
 
     adminsRepository.items.push(admin)
@@ -64,6 +68,9 @@ describe('Register Technician', () => {
       password: '123456',
       email: 'steveadams@email.com',
       tenantId: tenant.id.toString(),
+      supportLevel: 2,
+      specialties: ['Networking', 'Hardware'],
+      isActive: true,
     })
 
     expect(result.isRight()).toBeTruthy()
@@ -81,6 +88,7 @@ describe('Register Technician', () => {
     const tenant = Tenant.create(
       {
         name: 'Acme corp',
+        status: 'ACTIVE',
       },
       new UniqueEntityID(),
     )
@@ -94,6 +102,9 @@ describe('Register Technician', () => {
       email: 'johndoe@email.com',
       password: '123456',
       tenantId: tenant.id.toString(),
+      supportLevel: 2,
+      specialties: ['Networking', 'Hardware'],
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()
@@ -104,6 +115,7 @@ describe('Register Technician', () => {
     const tenant = Tenant.create(
       {
         name: 'Acme corp',
+        status: 'ACTIVE',
       },
       new UniqueEntityID(),
     )
@@ -111,32 +123,41 @@ describe('Register Technician', () => {
     tenantsRepository.items.push(tenant)
 
     const admin = Admin.create({
+      tenantId: tenant.id,
       firstName: 'John',
       lastName: 'Doe',
       email: EmailValueObject.create('johndoe@email.com'),
       password: '123456',
-      tenantId: tenant.id,
+      department: 'TI',
+      jobTitle: 'Administrador',
+      isActive: true,
     })
 
     await adminsRepository.create(admin)
 
     const technician = Technician.create({
+      tenantId: tenant.id,
       firstName: 'James',
       lastName: 'Stewart',
       email: EmailValueObject.create('jamesstewart@email.com'),
       password: '123456',
-      tenantId: tenant.id,
+      supportLevel: 2,
+      specialties: ['Networking', 'Hardware'],
+      isActive: true,
     })
 
     await techniciansRepository.create(technician)
 
     const result = await sut.execute({
+      tenantId: tenant.id.toString(),
       creatorId: admin.id.toString(),
       firstName: 'James',
       lastName: 'Stewart',
       email: 'jamesstewart@email.com',
       password: '123456',
-      tenantId: tenant.id.toString(),
+      supportLevel: 2,
+      specialties: ['Networking', 'Hardware'],
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()
@@ -145,22 +166,28 @@ describe('Register Technician', () => {
 
   it('shouldn`t be able to register an technician if tenant doesn`t exists', async () => {
     const admin = Admin.create({
+      tenantId: new UniqueEntityID('non-existent-tenant-id'),
       firstName: 'John',
       lastName: 'Doe',
       email: EmailValueObject.create('johndoe@email.com'),
       password: '123456',
-      tenantId: new UniqueEntityID('non-existent-tenant-id'),
+      department: 'TI',
+      jobTitle: 'Administrador',
+      isActive: true,
     })
 
     adminsRepository.items.push(admin)
 
     const result = await sut.execute({
+      tenantId: 'tenant-id-1',
       creatorId: admin.id.toString(),
       firstName: 'Steve',
       lastName: 'Adams',
       email: 'steveadams@email.com',
       password: '123456',
-      tenantId: 'tenant-id-1',
+      supportLevel: 2,
+      specialties: ['Networking', 'Hardware'],
+      isActive: true,
     })
 
     expect(result.isLeft()).toBeTruthy()
