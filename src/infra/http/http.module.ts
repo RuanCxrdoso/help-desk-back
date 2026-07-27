@@ -5,9 +5,10 @@ import { CryptographyModule } from '../cryptography/cryptography.module'
 import { RegisterEmployeeUseCase } from '@/domain/help-desk/application/use-cases/register-employee'
 import { APP_FILTER } from '@nestjs/core'
 import { DomainErrorFilter } from './filters/domain-error.filter'
+import { AuthModule } from './auth/auth.module'
 
 @Module({
-  imports: [DatabaseModule, CryptographyModule],
+  imports: [DatabaseModule, CryptographyModule, AuthModule],
   providers: [
     RegisterEmployeeUseCase,
     {
