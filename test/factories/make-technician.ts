@@ -12,11 +12,17 @@ export function makeTechnician(
 ) {
   return Technician.create(
     {
+      tenantId: new UniqueEntityID(),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       email: EmailValueObject.create(faker.internet.email()),
       password: faker.internet.password(),
-      tenantId: new UniqueEntityID(),
+      supportLevel: faker.helpers.arrayElement([1, 2, 3]),
+      specialties: faker.helpers.arrayElements(
+        ['Networking', 'Hardware', 'Software'],
+        { min: 1, max: 3 },
+      ),
+      isActive: true,
       ...override,
     },
     id,
