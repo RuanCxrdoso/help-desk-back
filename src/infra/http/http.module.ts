@@ -13,12 +13,27 @@ import { AdminRegisterController } from './controllers/register/admin-register.c
 import { TechnicianRegisterController } from './controllers/register/technician-register.controller'
 import { TenantAndAdminRegisterController } from './controllers/register/tenant-and-admin-register.controller'
 import { GetProfileController } from './controllers/profile/get-profile.controller'
+import { AuthenticateSuperAdminUseCase } from '@/domain/help-desk/application/use-cases/authenticate-super-admin'
+import { RegisterTenantAndAdminUseCase } from '@/domain/help-desk/application/use-cases/register-tenant-and-admin'
+import { RegisterTechnicianUseCase } from '@/domain/help-desk/application/use-cases/register-technician'
+import { RegisterAdminUseCase } from '@/domain/help-desk/application/use-cases/register-admin'
+import { GetSuperAdminProfileUseCase } from '@/domain/help-desk/application/use-cases/get-super-admin-profile'
+import { GetAdminProfileUseCase } from '@/domain/help-desk/application/use-cases/get-admin-profile'
+import { GetTechnicianProfileUseCase } from '@/domain/help-desk/application/use-cases/get-technician-profile'
 
 @Module({
   imports: [DatabaseModule, CryptographyModule, AuthModule],
   providers: [
-    RegisterEmployeeUseCase,
+    AuthenticateSuperAdminUseCase,
     AuthenticateUseCase,
+    RegisterTenantAndAdminUseCase,
+    RegisterAdminUseCase,
+    RegisterTechnicianUseCase,
+    RegisterEmployeeUseCase,
+    GetSuperAdminProfileUseCase,
+    GetAdminProfileUseCase,
+    GetTechnicianProfileUseCase,
+    GetSuperAdminProfileUseCase,
     {
       provide: APP_FILTER,
       useClass: DomainErrorFilter,
