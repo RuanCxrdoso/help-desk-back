@@ -4,6 +4,7 @@ import { Either, left, right } from '@/core/error/either'
 import { NotAllowedError } from '../errors/not-allowed-error'
 import { NotFoundError } from '../errors/not-found-error'
 import { Technician } from '../../enterprise/entities/technician'
+import { Injectable } from '@nestjs/common'
 
 interface GetTechnicianProfileUseCaseRequest {
   id: string
@@ -16,6 +17,7 @@ type GetTechnicianProfileUseCaseResponse = Either<
   { technician: Technician }
 >
 
+@Injectable()
 export class GetTechnicianProfileUseCase {
   constructor(private techniciansRepository: ITechniciansRepository) {}
 

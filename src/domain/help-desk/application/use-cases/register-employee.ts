@@ -10,6 +10,7 @@ import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { ITenantsRepository } from '../repositories/tenants-repository'
 import { NotFoundError } from '../errors/not-found-error'
 import { IUsersRepository } from '../repositories/users-repository'
+import { Injectable } from '@nestjs/common'
 
 export interface RegisterEmployeeUseCaseRequest {
   creatorId: string
@@ -29,6 +30,7 @@ export type RegisterEmployeeUseCaseResponse = Either<
   null
 >
 
+@Injectable()
 export class RegisterEmployeeUseCase {
   constructor(
     private tenantsRepository: ITenantsRepository,

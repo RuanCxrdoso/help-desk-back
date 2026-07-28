@@ -6,6 +6,7 @@ import { ITenantsRepository } from '../repositories/tenants-repository'
 import { NotFoundError } from '../errors/not-found-error'
 import { IUsersRepository } from '../repositories/users-repository'
 import { TENANT_STATUS } from 'generated/prisma/enums'
+import { Injectable } from '@nestjs/common'
 
 interface AuthenticateRequest {
   email: string
@@ -18,6 +19,7 @@ type AuthenticateResponse = Either<
   { accessToken: string }
 >
 
+@Injectable()
 export class AuthenticateUseCase {
   constructor(
     private usersRepository: IUsersRepository,
