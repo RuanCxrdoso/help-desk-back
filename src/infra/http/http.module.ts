@@ -20,6 +20,7 @@ import { RegisterAdminUseCase } from '@/domain/help-desk/application/use-cases/r
 import { GetSuperAdminProfileUseCase } from '@/domain/help-desk/application/use-cases/get-super-admin-profile'
 import { GetAdminProfileUseCase } from '@/domain/help-desk/application/use-cases/get-admin-profile'
 import { GetTechnicianProfileUseCase } from '@/domain/help-desk/application/use-cases/get-technician-profile'
+import { GetEmployeeProfileUseCase } from '@/domain/help-desk/application/use-cases/get-employee-profile'
 
 @Module({
   imports: [DatabaseModule, CryptographyModule, AuthModule],
@@ -33,7 +34,7 @@ import { GetTechnicianProfileUseCase } from '@/domain/help-desk/application/use-
     GetSuperAdminProfileUseCase,
     GetAdminProfileUseCase,
     GetTechnicianProfileUseCase,
-    GetSuperAdminProfileUseCase,
+    GetEmployeeProfileUseCase,
     {
       provide: APP_FILTER,
       useClass: DomainErrorFilter,
