@@ -4,8 +4,6 @@ import { Either, left, right } from '@/core/error/either'
 import { IHashGenerator } from '../cryptography/hash-generator'
 import { UserAlreadyExistsError } from '../errors/user-already-exists-error'
 import { ITechniciansRepository } from '../repositories/technicians-repository'
-import { NotAllowedError } from '../errors/not-allowed-error'
-import { IAdminsRepository } from '../repositories/admins-repository'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { ITenantsRepository } from '../repositories/tenants-repository'
 import { NotFoundError } from '../errors/not-found-error'
@@ -13,7 +11,6 @@ import { IUsersRepository } from '../repositories/users-repository'
 import { Injectable } from '@nestjs/common'
 
 export interface RegisterTechnicianUseCaseRequest {
-  creatorId: string
   tenantId: string
   firstName: string
   lastName: string
@@ -25,7 +22,7 @@ export interface RegisterTechnicianUseCaseRequest {
 }
 
 export type RegisterTechnicianUseCaseResponse = Either<
-  NotAllowedError | UserAlreadyExistsError | NotFoundError,
+  UserAlreadyExistsError | NotFoundError,
   null
 >
 
@@ -34,13 +31,11 @@ export class RegisterTechnicianUseCase {
   constructor(
     private tenantsRepository: ITenantsRepository,
     private techniciansRepository: ITechniciansRepository,
-    private adminsRepository: IAdminsRepository,
     private usersRepository: IUsersRepository,
     private hashGenerator: IHashGenerator,
   ) {}
 
   async execute({
-    creatorId,
     password,
     tenantId,
     email,
@@ -49,10 +44,6 @@ export class RegisterTechnicianUseCase {
     const tenant = await this.tenantsRepository.findById(tenantId)
 
     if (!tenant) return left(new NotFoundError())
-
-    const creator = await this.adminsRepository.findById(creatorId, tenantId)
-
-    if (!creator) return left(new NotAllowedError())
 
     const technicianWithSameEmail = await this.usersRepository.findByEmail(
       email,

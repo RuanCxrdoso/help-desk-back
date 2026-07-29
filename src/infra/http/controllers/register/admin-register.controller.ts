@@ -12,9 +12,7 @@ import { CheckPolicies } from '../../auth/casl/check-policies.decorator'
 import { Action } from '../../auth/casl/action'
 import z from 'zod'
 import { ZodValidationPipe } from '../../utils/pipes/zod-validation.pipe'
-import { User } from '../../utils/decorators/user.decorator'
-import { type TokenPayload } from '../../auth/jwt.strategy'
-import { NotAllowedError } from '@/domain/help-desk/application/errors/not-allowed-error'
+import { TenantId } from '../../utils/decorators/target-tenant.decorator'
 
 const adminRegisterBodySchema = z.object({
   firstName: z.string().min(2, { error: 'First name must be provided' }),
@@ -26,6 +24,7 @@ const adminRegisterBodySchema = z.object({
   department: z.string().min(1, { error: 'Department must be provided' }),
   jobTitle: z.string().min(1, { error: 'Job title must be provided' }),
   isActive: z.boolean().optional().default(true),
+  tenantId: z.uuid().optional(),
 })
 
 type AdminRegisterBodyDTO = z.infer<typeof adminRegisterBodySchema>
@@ -42,7 +41,7 @@ export class AdminRegisterController {
   @CheckPolicies((ability) => ability.can(Action.Create, 'User'))
   async handle(
     @Body(adminRegisterBodyPipe) body: AdminRegisterBodyDTO,
-    @User() user: TokenPayload,
+    @TenantId() tenantId: string,
   ) {
     const {
       firstName,
@@ -53,17 +52,9 @@ export class AdminRegisterController {
       jobTitle,
       isActive,
     } = body
-    const { sub } = user
-
-    if (!user.tenantId) {
-      throw new NotAllowedError(
-        'A tenant context is required to register an administrator.',
-      )
-    }
 
     const result = await this.registerAdminUseCase.execute({
-      creatorId: sub,
-      tenantId: user.tenantId,
+      tenantId,
       firstName,
       lastName,
       email,

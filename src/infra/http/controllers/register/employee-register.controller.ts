@@ -9,12 +9,10 @@ import {
 } from '@nestjs/common'
 import { ZodValidationPipe } from '../../utils/pipes/zod-validation.pipe'
 import z from 'zod'
-import { User } from '../../utils/decorators/user.decorator'
-import { type TokenPayload } from '../../auth/jwt.strategy'
 import { PoliciesGuard } from '../../auth/casl/policies.guard'
 import { CheckPolicies } from '../../auth/casl/check-policies.decorator'
 import { Action } from '../../auth/casl/action'
-import { NotAllowedError } from '@/domain/help-desk/application/errors/not-allowed-error'
+import { TenantId } from '../../utils/decorators/target-tenant.decorator'
 
 const employeeRegisterBodySchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -25,6 +23,7 @@ const employeeRegisterBodySchema = z.object({
   department: z.string().min(1, 'Department is required'),
   jobTitle: z.string().min(1, 'Job title is required'),
   location: z.string().min(1, 'Location is required'),
+  tenantId: z.uuid().optional(),
 })
 
 type EmployeeRegisterBodyDTO = z.infer<typeof employeeRegisterBodySchema>
@@ -43,7 +42,7 @@ export class EmployeeRegisterController {
   @CheckPolicies((ability) => ability.can(Action.Manage, 'User'))
   async handle(
     @Body(registerEmployeePipe) body: EmployeeRegisterBodyDTO,
-    @User() user: TokenPayload,
+    @TenantId() tenantId: string,
   ) {
     const {
       firstName,
@@ -56,22 +55,13 @@ export class EmployeeRegisterController {
       location,
     } = body
 
-    const { sub } = user
-
-    if (!user.tenantId) {
-      throw new NotAllowedError(
-        'A tenant context is required to register an employee.',
-      )
-    }
-
     const result = await this.registerEmployeeUseCase.execute({
-      creatorId: sub,
-      tenantId: user.tenantId,
+      tenantId,
       firstName,
       lastName,
       email,
       password,
-      isActive: isActive ?? true,
+      isActive,
       department,
       jobTitle,
       location,

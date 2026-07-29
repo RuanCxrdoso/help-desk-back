@@ -4,8 +4,6 @@ import { Either, left, right } from '@/core/error/either'
 import { IHashGenerator } from '../cryptography/hash-generator'
 import { UserAlreadyExistsError } from '../errors/user-already-exists-error'
 import { IAdminsRepository } from '../repositories/admins-repository'
-import { NotAllowedError } from '../errors/not-allowed-error'
-import { ISuperAdminsRepository } from '../repositories/super-admins-repository'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { ITenantsRepository } from '../repositories/tenants-repository'
 import { NotFoundError } from '../errors/not-found-error'
@@ -13,7 +11,6 @@ import { IUsersRepository } from '../repositories/users-repository'
 import { Injectable } from '@nestjs/common'
 
 export interface RegisterAdminUseCaseRequest {
-  creatorId: string
   tenantId: string
   firstName: string
   lastName: string
@@ -25,7 +22,7 @@ export interface RegisterAdminUseCaseRequest {
 }
 
 export type RegisterAdminUseCaseResponse = Either<
-  NotAllowedError | UserAlreadyExistsError | NotFoundError,
+  UserAlreadyExistsError | NotFoundError,
   null
 >
 
@@ -34,23 +31,17 @@ export class RegisterAdminUseCase {
   constructor(
     private tenantsRepository: ITenantsRepository,
     private adminsRepository: IAdminsRepository,
-    private superAdminsRepository: ISuperAdminsRepository,
     private usersRepository: IUsersRepository,
     private hashGenerator: IHashGenerator,
   ) {}
 
   async execute({
-    creatorId,
     password,
     ...data
   }: RegisterAdminUseCaseRequest): Promise<RegisterAdminUseCaseResponse> {
     const tenantExists = await this.tenantsRepository.findById(data.tenantId)
 
     if (!tenantExists) return left(new NotFoundError())
-
-    const creator = await this.superAdminsRepository.findById(creatorId)
-
-    if (!creator) return left(new NotAllowedError())
 
     const adminWithSameEmail = await this.usersRepository.findByEmail(
       data.email,
