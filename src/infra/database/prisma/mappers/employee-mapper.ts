@@ -1,25 +1,77 @@
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { Employee } from '@/domain/help-desk/enterprise/entities/employee'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
-import { User } from 'generated/prisma/client'
+import { EmployeeProfile, User } from 'generated/prisma/client'
 import { ROLE } from 'generated/prisma/enums'
-import { UserUncheckedCreateInput } from 'generated/prisma/models'
+import { UserCreateInput, UserUpdateInput } from 'generated/prisma/models'
+
+type PrismaEmployeeWithProfile = User & {
+  employeeProfile: EmployeeProfile | null
+}
 
 export class EmployeeMapper {
-  public static toPrisma(raw: Employee): UserUncheckedCreateInput {
+  public static toPrismaUser(raw: Employee): UserCreateInput {
     return {
       id: raw.id.toString(),
-      tenantId: raw.tenantId.toString(),
       firstName: raw.firstName,
       lastName: raw.lastName,
       email: raw.email.value,
       password: raw.password,
       role: ROLE.EMPLOYEE,
+      isActive: raw.isActive,
       createdAt: raw.createdAt,
+      deletedAt: raw.deletedAt,
+      tenant: {
+        connect: {
+          id: raw.tenantId.toString(),
+        },
+      },
+      employeeProfile: {
+        create: {
+          department: raw.department,
+          jobTitle: raw.jobTitle,
+          location: raw.location,
+        },
+      },
     }
   }
 
-  public static toDomain(raw: User): Employee {
+  public static toPrismaUpdate(raw: Employee): UserUpdateInput {
+    return {
+      id: raw.id.toString(),
+      firstName: raw.firstName,
+      lastName: raw.lastName,
+      email: raw.email.value,
+      password: raw.password,
+      role: ROLE.EMPLOYEE,
+      isActive: raw.isActive,
+      createdAt: raw.createdAt,
+      deletedAt: raw.deletedAt,
+      tenant: {
+        connect: {
+          id: raw.tenantId.toString(),
+        },
+      },
+      employeeProfile: {
+        create: {
+          department: raw.department,
+          jobTitle: raw.jobTitle,
+          location: raw.location,
+        },
+        update: {
+          department: raw.department,
+          jobTitle: raw.jobTitle,
+          location: raw.location,
+        },
+      },
+    }
+  }
+
+  public static toDomain(raw: PrismaEmployeeWithProfile): Employee {
+    if (!raw.employeeProfile) {
+      throw new Error('Employee profile relation is not loaded.')
+    }
+
     return Employee.create(
       {
         tenantId: new UniqueEntityID(raw.tenantId),
@@ -27,8 +79,13 @@ export class EmployeeMapper {
         lastName: raw.lastName,
         email: EmailValueObject.create(raw.email),
         password: raw.password,
+        department: raw.employeeProfile.department,
+        jobTitle: raw.employeeProfile.jobTitle,
+        location: raw.employeeProfile.location,
+        isActive: raw.isActive,
         createdAt: raw.createdAt,
-        updatedAt: raw.updatedAt ? new Date(raw.updatedAt) : undefined,
+        updatedAt: raw.updatedAt,
+        deletedAt: raw.deletedAt,
       },
       new UniqueEntityID(raw.id),
     )

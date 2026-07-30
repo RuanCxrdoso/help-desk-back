@@ -3,6 +3,7 @@ import { InvalidCredentialsError } from '../errors/invalid-credentials-error'
 import { IHashComparer } from '../cryptography/hash-comparer'
 import { IEncrypter } from '../cryptography/encrypter'
 import { ISuperAdminsRepository } from '../repositories/super-admins-repository'
+import { Injectable } from '@nestjs/common'
 
 interface AuthenticateSuperAdminRequest {
   email: string
@@ -14,6 +15,7 @@ type AuthenticateSuperAdminResponse = Either<
   { accessToken: string }
 >
 
+@Injectable()
 export class AuthenticateSuperAdminUseCase {
   constructor(
     private superAdminsRepository: ISuperAdminsRepository,

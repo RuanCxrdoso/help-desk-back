@@ -5,6 +5,8 @@ import { IEncrypter } from '../cryptography/encrypter'
 import { ITenantsRepository } from '../repositories/tenants-repository'
 import { NotFoundError } from '../errors/not-found-error'
 import { IUsersRepository } from '../repositories/users-repository'
+import { TENANT_STATUS } from 'generated/prisma/enums'
+import { Injectable } from '@nestjs/common'
 
 interface AuthenticateRequest {
   email: string
@@ -17,6 +19,7 @@ type AuthenticateResponse = Either<
   { accessToken: string }
 >
 
+@Injectable()
 export class AuthenticateUseCase {
   constructor(
     private usersRepository: IUsersRepository,
@@ -32,7 +35,8 @@ export class AuthenticateUseCase {
   }: AuthenticateRequest): Promise<AuthenticateResponse> {
     const tenant = await this.tenantsRepository.findBySlug(tenantSlug)
 
-    if (!tenant) return left(new NotFoundError())
+    if (!tenant || tenant.status !== TENANT_STATUS.ACTIVE)
+      return left(new InvalidCredentialsError())
 
     const { id: tenantId } = tenant
 

@@ -4,6 +4,7 @@ import { Either, left, right } from '@/core/error/either'
 import { NotAllowedError } from '../errors/not-allowed-error'
 import { NotFoundError } from '../errors/not-found-error'
 import { Admin } from '../../enterprise/entities/admin'
+import { Injectable } from '@nestjs/common'
 
 interface GetAdminProfileUseCaseRequest {
   id: string
@@ -16,6 +17,7 @@ type GetAdminProfileUseCaseResponse = Either<
   { admin: Admin }
 >
 
+@Injectable()
 export class GetAdminProfileUseCase {
   constructor(private adminsRepository: IAdminsRepository) {}
 

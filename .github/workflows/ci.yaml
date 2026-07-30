@@ -5,6 +5,7 @@ on:
     branches: [developer]
   pull_request:
     types: [opened, synchronize]
+    branches: [developer]
 
 jobs:
   build-and-tests:
@@ -30,7 +31,7 @@ jobs:
         run: pnpm install
 
       - name: Run prisma generate
-        run: pnpm prisma:generate
+        run: pnpm generate
 
       - name: Run linter
         run: pnpm lint:check

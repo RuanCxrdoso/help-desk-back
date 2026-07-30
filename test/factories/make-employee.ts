@@ -12,11 +12,15 @@ export function makeEmployee(
 ) {
   return Employee.create(
     {
+      tenantId: new UniqueEntityID(),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       email: EmailValueObject.create(faker.internet.email()),
       password: faker.internet.password(),
-      tenantId: new UniqueEntityID(),
+      department: faker.person.jobArea(),
+      jobTitle: faker.person.jobTitle(),
+      location: faker.location.city(),
+      isActive: true,
       ...override,
     },
     id,

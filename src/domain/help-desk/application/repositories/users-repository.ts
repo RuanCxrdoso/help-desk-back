@@ -5,4 +5,6 @@ export abstract class IUsersRepository {
     email: string,
     tenantId: string,
   ): Promise<User<any> | null>
+
+  abstract findById(id: string): Promise<User<any> | null>
 }
