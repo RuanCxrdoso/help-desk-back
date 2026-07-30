@@ -8,6 +8,7 @@ import { Admin } from '../../enterprise/entities/admin'
 import { EmailValueObject } from '../../enterprise/entities/value-objects/email-value-object'
 import { IHashGenerator } from '../cryptography/hash-generator'
 import { TENANT_STATUS } from 'generated/prisma/enums'
+import { Injectable } from '@nestjs/common'
 
 interface RegisterTenantAndAdminUseCaseRequest {
   tenant: {
@@ -31,6 +32,7 @@ type RegisterTenantAndAdminUseCaseResponse = Either<
   null
 >
 
+@Injectable()
 export class RegisterTenantAndAdminUseCase {
   constructor(
     private tenantAndAdminRegister: ITenantAndAdminRegisterGateway,

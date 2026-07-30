@@ -12,9 +12,7 @@ import { CheckPolicies } from '../../auth/casl/check-policies.decorator'
 import { Action } from '../../auth/casl/action'
 import z from 'zod'
 import { ZodValidationPipe } from '../../utils/pipes/zod-validation.pipe'
-import { User } from '../../utils/decorators/user.decorator'
-import { type TokenPayload } from '../../auth/jwt.strategy'
-import { NotAllowedError } from '@/domain/help-desk/application/errors/not-allowed-error'
+import { TenantId } from '../../utils/decorators/target-tenant.decorator'
 
 const technicianRegisterBodySchema = z.object({
   firstName: z.string().min(2, { error: 'First name must be provided' }),
@@ -31,6 +29,7 @@ const technicianRegisterBodySchema = z.object({
   specialties: z.array(
     z.string().min(1, { error: 'Specialties must be provided' }),
   ),
+  tenantId: z.uuid().optional(),
 })
 
 type TechnicianRegisterBodyDTO = z.infer<typeof technicianRegisterBodySchema>
@@ -51,7 +50,7 @@ export class TechnicianRegisterController {
   @CheckPolicies((ability) => ability.can(Action.Create, 'User'))
   async handle(
     @Body(technicianRegisterBodyPipe) body: TechnicianRegisterBodyDTO,
-    @User() user: TokenPayload,
+    @TenantId() tenantId: string,
   ) {
     const {
       firstName,
@@ -63,17 +62,8 @@ export class TechnicianRegisterController {
       specialties,
     } = body
 
-    const { sub } = user
-
-    if (!user.tenantId) {
-      throw new NotAllowedError(
-        'A tenant context is required to register an technician.',
-      )
-    }
-
     const result = await this.registerTechnicianUseCase.execute({
-      creatorId: sub,
-      tenantId: user.tenantId,
+      tenantId,
       firstName,
       lastName,
       email,
