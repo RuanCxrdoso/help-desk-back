@@ -6,10 +6,10 @@ import { AuthUser } from '../../enterprise/entities/auth-user'
 interface FetchEmployeesUseCaseRequest {
   tenantId: string
   params: {
-    q: string | null
+    q?: string | null
     page: number
     perPage: number
-    orderBy: string
+    orderBy:  'firstName' | 'email' | 'createdAt'
     order: 'asc' | 'desc'
   }
 }
@@ -21,7 +21,7 @@ interface FetchEmployeesRightResponse {
     perPage: number
     totalCount: number
     totalPages: number
-    orderBy: string
+    orderBy:  'firstName' | 'email' | 'createdAt'
     order: 'asc' | 'desc'
   }
 }

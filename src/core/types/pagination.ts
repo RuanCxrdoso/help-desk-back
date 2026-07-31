@@ -1,8 +1,8 @@
 export interface PaginationParams {
-  q: string | null
+  q?: string | null
   page: number
   perPage: number
-  orderBy: string
+  orderBy:  'firstName' | 'email' | 'createdAt'
   order: 'asc' | 'desc'
 }
 
@@ -12,6 +12,6 @@ export interface PaginatedResult<T> {
   perPage: number
   totalCount: number
   totalPages: number
-  orderBy: string
+  orderBy:  'firstName' | 'email' | 'createdAt'
   order: 'asc' | 'desc'
 }
