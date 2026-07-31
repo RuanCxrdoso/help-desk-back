@@ -1,6 +1,7 @@
 import { IAdminsRepository } from '@/domain/help-desk/application/repositories/admins-repository'
 import { Admin } from '@/domain/help-desk/enterprise/entities/admin'
 import { InMemoryUsersRepository } from './in-memory-users-repository'
+import { PaginationParams } from '@/core/types/pagination'
 
 export class InMemoryAdminsRepository implements IAdminsRepository {
   public items: Admin[] = []
@@ -28,5 +29,54 @@ export class InMemoryAdminsRepository implements IAdminsRepository {
     if (!user) return null
 
     return user
+  }
+
+  async findMany(tenantId: string, params: PaginationParams) {
+    const { q, page, perPage, orderBy, order } = params
+
+    let filteredItems = this.items.filter(
+      (item) => item.tenantId.toString() === tenantId,
+    )
+
+    if (q) {
+      filteredItems = filteredItems.filter(
+        (item) =>
+          item.firstName.toLowerCase().includes(q.toLowerCase()) ||
+          item.lastName.toLowerCase().includes(q.toLowerCase()) ||
+          item.email.value.toLowerCase().includes(q.toLowerCase()),
+      )
+    }
+
+    filteredItems.sort((a, b) => {
+      const valueA =
+        orderBy === 'email'
+          ? a.email.value.toLowerCase()
+          : String(a[orderBy as keyof typeof a]).toLowerCase()
+      const valueB =
+        orderBy === 'email'
+          ? b.email.value.toLowerCase()
+          : String(b[orderBy as keyof typeof b]).toLowerCase()
+
+      if (valueA < valueB) return order === 'asc' ? -1 : 1
+      if (valueA > valueB) return order === 'asc' ? 1 : -1
+      return 0
+    })
+
+    const totalCount = filteredItems.length
+    const totalPages = Math.ceil(totalCount / perPage)
+    const startIndex = (page - 1) * perPage
+    const endIndex = startIndex + perPage
+
+    const paginatedItems = filteredItems.slice(startIndex, endIndex)
+
+    return {
+      items: paginatedItems,
+      page,
+      perPage,
+      totalCount,
+      totalPages,
+      orderBy,
+      order,
+    }
   }
 }
