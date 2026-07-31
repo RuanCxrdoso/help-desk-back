@@ -9,7 +9,7 @@ interface FetchTechniciansUseCaseRequest {
     q?: string | null
     page: number
     perPage: number
-    orderBy:  'firstName' | 'email' | 'createdAt'
+    orderBy: 'firstName' | 'email' | 'createdAt'
     order: 'asc' | 'desc'
   }
 }
@@ -21,7 +21,7 @@ interface FetchTechniciansRightResponse {
     perPage: number
     totalCount: number
     totalPages: number
-    orderBy:  'firstName' | 'email' | 'createdAt'
+    orderBy: 'firstName' | 'email' | 'createdAt'
     order: 'asc' | 'desc'
   }
 }
