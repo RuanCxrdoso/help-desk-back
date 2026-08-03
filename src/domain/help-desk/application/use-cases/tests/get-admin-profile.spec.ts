@@ -1,7 +1,6 @@
 import { makeAdmin } from 'test/factories/make-admin'
 import { InMemoryAdminsRepository } from 'test/repositories/in-memory-admins-repository'
 import { GetAdminProfileUseCase } from '../get-admin-profile'
-import { NotAllowedError } from '../../errors/not-allowed-error'
 import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository'
 
 let usersRepository: InMemoryUsersRepository
@@ -25,7 +24,6 @@ describe('Get Admin Profile', () => {
     const result = await sut.execute({
       id: admin.id.toString(),
       tenantId: admin.tenantId.toString(),
-      role: admin.role,
     })
     expect(result.isRight()).toBeTruthy()
     expect(result.value).toEqual({
@@ -33,19 +31,5 @@ describe('Get Admin Profile', () => {
         firstName: 'Lewis Hamilton',
       }),
     })
-  })
-
-  it('shouldn`t be able to get profile with wrong role', async () => {
-    const admin = makeAdmin()
-
-    adminsRepository.items.push(admin)
-
-    const result = await sut.execute({
-      id: admin.id.toString(),
-      tenantId: admin.tenantId.toString(),
-      role: 'EMPLOYEE',
-    })
-
-    expect(result.value).toBeInstanceOf(NotAllowedError)
   })
 })

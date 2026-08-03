@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma.service'
 import { Technician } from '@/domain/help-desk/enterprise/entities/technician'
 import { TechnicianMapper } from '../mappers/technician-mapper'
 import { Injectable } from '@nestjs/common'
+import { ROLE } from 'generated/prisma/enums'
 
 @Injectable()
 export class PrismaTechniciansRepository implements ITechniciansRepository {
@@ -21,6 +22,7 @@ export class PrismaTechniciansRepository implements ITechniciansRepository {
       where: {
         id,
         tenantId,
+        role: ROLE.TECHNICIAN,
       },
       include: {
         technicianProfile: true,
