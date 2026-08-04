@@ -56,7 +56,6 @@ export class GetProfileController {
         const result = await this.getAdminProfileUseCase.execute({
           id,
           tenantId: user.tenantId,
-          role,
         })
 
         if (result.isLeft()) throw result.value
@@ -69,7 +68,6 @@ export class GetProfileController {
         const result = await this.getTechnicianProfileUseCase.execute({
           id,
           tenantId: user.tenantId,
-          role,
         })
 
         if (result.isLeft()) throw result.value
@@ -82,7 +80,6 @@ export class GetProfileController {
         const result = await this.getEmployeeProfileUseCase.execute({
           id,
           tenantId: user.tenantId,
-          role,
         })
 
         if (result.isLeft()) throw result.value

@@ -1,8 +1,9 @@
 import { makeEmployee } from 'test/factories/make-employee'
 import { InMemoryEmployeesRepository } from 'test/repositories/in-memory-employees-repository'
 import { GetEmployeeProfileUseCase } from '../get-employee-profile'
-import { NotAllowedError } from '../../errors/not-allowed-error'
 import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository'
+import { NotFoundError } from '../../errors/not-found-error'
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
 let usersRepository: InMemoryUsersRepository
 let employeesRepository: InMemoryEmployeesRepository
@@ -25,7 +26,6 @@ describe('Get Employee Profile', () => {
     const result = await sut.execute({
       id: employee.id.toString(),
       tenantId: employee.tenantId.toString(),
-      role: employee.role,
     })
     expect(result.isRight()).toBeTruthy()
     expect(result.value).toEqual({
@@ -35,19 +35,29 @@ describe('Get Employee Profile', () => {
     })
   })
 
-  it('shouldn`t be able to get profile with wrong role', async () => {
+  it('should not be able to get an inexistent employee profile', async () => {
+    const result = await sut.execute({
+      id: 'invalid-id',
+      tenantId: 'tenant-1',
+    })
+
+    expect(result.isLeft()).toBeTruthy()
+    expect(result.value).toBeInstanceOf(NotFoundError)
+  })
+
+  it('should not be able to get a profile from another tenant', async () => {
     const employee = makeEmployee({
-      firstName: 'Steph Curry',
+      tenantId: new UniqueEntityID('tenant-1'),
     })
 
     employeesRepository.items.push(employee)
 
     const result = await sut.execute({
       id: employee.id.toString(),
-      tenantId: employee.tenantId.toString(),
-      role: 'TECHNICIAN',
+      tenantId: 'tenant-2',
     })
 
-    expect(result.value).toBeInstanceOf(NotAllowedError)
+    expect(result.isLeft()).toBeTruthy()
+    expect(result.value).toBeInstanceOf(NotFoundError)
   })
 })

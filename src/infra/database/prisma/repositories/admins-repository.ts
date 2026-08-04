@@ -4,10 +4,23 @@ import { PrismaService } from '../prisma.service'
 import { Injectable } from '@nestjs/common'
 import { AdminMapper } from '../mappers/admin-mapper'
 import { ROLE } from 'generated/prisma/enums'
+import { PaginationParams, PaginatedResult } from '@/core/types/pagination'
+import { AuthUser } from '@/domain/help-desk/enterprise/entities/auth-user'
 
 @Injectable()
 export class PrismaAdminsRepository implements IAdminsRepository {
   constructor(private readonly prisma: PrismaService) {}
+  findMany(
+    tenantId: string,
+    params: PaginationParams,
+  ): Promise<PaginatedResult<AuthUser>> {
+    console.log(
+      '🚀 ~ PrismaTechniciansRepository ~ findMany ~ tenantId:',
+      tenantId,
+    )
+    console.log('🚀 ~ PrismaTechniciansRepository ~ findMany ~ params:', params)
+    throw new Error('Method not implemented.')
+  }
 
   async create(user: Admin): Promise<void> {
     const adminPrisma = AdminMapper.toPrismaUser(user)

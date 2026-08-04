@@ -1,8 +1,9 @@
 import { makeAdmin } from 'test/factories/make-admin'
 import { InMemoryAdminsRepository } from 'test/repositories/in-memory-admins-repository'
 import { GetAdminProfileUseCase } from '../get-admin-profile'
-import { NotAllowedError } from '../../errors/not-allowed-error'
 import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repository'
+import { NotFoundError } from '../../errors/not-found-error'
+import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 
 let usersRepository: InMemoryUsersRepository
 let adminsRepository: InMemoryAdminsRepository
@@ -25,7 +26,6 @@ describe('Get Admin Profile', () => {
     const result = await sut.execute({
       id: admin.id.toString(),
       tenantId: admin.tenantId.toString(),
-      role: admin.role,
     })
     expect(result.isRight()).toBeTruthy()
     expect(result.value).toEqual({
@@ -35,17 +35,29 @@ describe('Get Admin Profile', () => {
     })
   })
 
-  it('shouldn`t be able to get profile with wrong role', async () => {
-    const admin = makeAdmin()
-
-    adminsRepository.items.push(admin)
-
+  it('should not be able to get an inexistent employee profile', async () => {
     const result = await sut.execute({
-      id: admin.id.toString(),
-      tenantId: admin.tenantId.toString(),
-      role: 'EMPLOYEE',
+      id: 'invalid-id',
+      tenantId: 'tenant-1',
     })
 
-    expect(result.value).toBeInstanceOf(NotAllowedError)
+    expect(result.isLeft()).toBeTruthy()
+    expect(result.value).toBeInstanceOf(NotFoundError)
+  })
+
+  it('should not be able to get a profile from another tenant', async () => {
+    const employee = makeAdmin({
+      tenantId: new UniqueEntityID('tenant-1'),
+    })
+
+    adminsRepository.items.push(employee)
+
+    const result = await sut.execute({
+      id: employee.id.toString(),
+      tenantId: 'tenant-2', // Simula a requisição originada de um tenant diferente
+    })
+
+    expect(result.isLeft()).toBeTruthy()
+    expect(result.value).toBeInstanceOf(NotFoundError)
   })
 })
