@@ -10,18 +10,6 @@ import { AuthUser } from '@/domain/help-desk/enterprise/entities/auth-user'
 @Injectable()
 export class PrismaTechniciansRepository implements ITechniciansRepository {
   constructor(private readonly prisma: PrismaService) {}
-  findMany(
-    tenantId: string,
-    params: PaginationParams,
-  ): Promise<PaginatedResult<AuthUser>> {
-    console.log(
-      '🚀 ~ PrismaTechniciansRepository ~ findMany ~ tenantId:',
-      tenantId,
-    )
-    console.log('🚀 ~ PrismaTechniciansRepository ~ findMany ~ params:', params)
-    throw new Error('Method not implemented.')
-  }
-
   async create(user: Technician): Promise<void> {
     const technicianPrisma = TechnicianMapper.toPrismaUser(user)
 
@@ -45,5 +33,23 @@ export class PrismaTechniciansRepository implements ITechniciansRepository {
     if (!technician || !technician.technicianProfile) return null
 
     return TechnicianMapper.toDomain(technician)
+  }
+
+  async findMany(
+    tenantId: string,
+    params: PaginationParams,
+  ): Promise<PaginatedResult<AuthUser>> {
+    console.log(
+      '🚀 ~ PrismaTechniciansRepository ~ findMany ~ tenantId:',
+      tenantId,
+    )
+    console.log('🚀 ~ PrismaTechniciansRepository ~ findMany ~ params:', params)
+    throw new Error('Method not implemented.')
+  }
+
+  async save(technician: Technician): Promise<void> {
+    console.log(technician)
+
+    throw new Error('Method not implemented.')
   }
 }
