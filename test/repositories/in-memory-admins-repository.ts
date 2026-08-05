@@ -7,7 +7,6 @@ export class InMemoryAdminsRepository implements IAdminsRepository {
   public items: Admin[] = []
 
   constructor(private usersRepository: InMemoryUsersRepository) {}
-
   async create(user: Admin) {
     this.items.push(user)
 
@@ -78,5 +77,15 @@ export class InMemoryAdminsRepository implements IAdminsRepository {
       orderBy,
       order,
     }
+  }
+
+  async save(admin: Admin): Promise<void> {
+    const adminIndex = this.items.findIndex(
+      (item) => item.id.equals(admin.id) && item.tenantId === admin.tenantId,
+    )
+
+    this.items[adminIndex] = admin
+
+    return
   }
 }
