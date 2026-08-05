@@ -23,6 +23,18 @@ export class Employee extends User<EmployeeProps> {
     return this.props.location
   }
 
+  set department(value: string) {
+    this.props.department = value
+  }
+
+  set jobTitle(value: string) {
+    this.props.jobTitle = value
+  }
+
+  set location(value: string) {
+    this.props.location = value
+  }
+
   static create(
     props: Optional<EmployeeProps, 'createdAt' | 'updatedAt' | 'role'>,
     id?: UniqueEntityID,

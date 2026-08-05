@@ -9,4 +9,5 @@ export abstract class IEmployeesRepository {
     tenantId: string,
     params: PaginationParams,
   ): Promise<PaginatedResult<AuthUser>>
+  abstract save(employee: Employee): Promise<void>
 }
