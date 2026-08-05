@@ -7,6 +7,7 @@ export class InMemoryAdminsRepository implements IAdminsRepository {
   public items: Admin[] = []
 
   constructor(private usersRepository: InMemoryUsersRepository) {}
+
   async create(user: Admin) {
     this.items.push(user)
 
