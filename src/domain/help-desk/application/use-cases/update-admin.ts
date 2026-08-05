@@ -29,9 +29,7 @@ export class UpdateAdminUseCase {
   }: UpdateAdminUseCaseRequest): Promise<UpdateAdminUseCaseResponse> {
     const admin = await this.adminsRepository.findById(id, tenantId)
 
-    if (!admin) {
-      return left(new NotFoundError())
-    }
+    if (!admin) return left(new NotFoundError())
 
     admin.firstName = firstName
     admin.lastName = lastName
