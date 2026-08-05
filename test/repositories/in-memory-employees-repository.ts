@@ -79,4 +79,10 @@ export class InMemoryEmployeesRepository implements IEmployeesRepository {
       order,
     }
   }
+
+  async save(employee: Employee): Promise<void> {
+    console.log(employee)
+
+    throw new Error('Method not implemented.')
+  }
 }
