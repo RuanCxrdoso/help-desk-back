@@ -32,7 +32,7 @@ describe('Update Employee', () => {
     }
   })
 
-  it('should be able to update an employee', async () => {
+  it('should be able to update a employee', async () => {
     const result = await sut.execute({
       id: 'id-1',
       tenantId: 'tenant-id-1',
@@ -86,7 +86,7 @@ describe('Update Employee', () => {
     }
   })
 
-  it('should be able to update an employee maintaining the unchanged fields', async () => {
+  it('should be able to update a employee maintaining the unchanged fields', async () => {
     const result = await sut.execute({
       id: 'id-1',
       tenantId: 'tenant-id-1',
