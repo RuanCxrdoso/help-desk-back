@@ -79,4 +79,15 @@ export class InMemoryEmployeesRepository implements IEmployeesRepository {
       order,
     }
   }
+
+  async save(employee: Employee): Promise<void> {
+    const employeeIndex = this.items.findIndex(
+      (item) =>
+        item.id.equals(employee.id) && item.tenantId === employee.tenantId,
+    )
+
+    this.items[employeeIndex] = employee
+
+    return
+  }
 }

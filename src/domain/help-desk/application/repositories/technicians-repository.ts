@@ -9,4 +9,5 @@ export abstract class ITechniciansRepository {
     tenantId: string,
     params: PaginationParams,
   ): Promise<PaginatedResult<AuthUser>>
+  abstract save(technician: Technician): Promise<void>
 }

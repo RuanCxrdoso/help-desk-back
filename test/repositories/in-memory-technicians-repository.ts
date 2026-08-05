@@ -7,7 +7,6 @@ export class InMemoryTechniciansRepository implements ITechniciansRepository {
   public items: Technician[] = []
 
   constructor(private usersRepository: InMemoryUsersRepository) {}
-
   async create(user: Technician) {
     this.items.push(user)
 
@@ -78,5 +77,16 @@ export class InMemoryTechniciansRepository implements ITechniciansRepository {
       orderBy,
       order,
     }
+  }
+
+  async save(technician: Technician): Promise<void> {
+    const technicianIndex = this.items.findIndex(
+      (item) =>
+        item.id.equals(technician.id) && item.tenantId === technician.tenantId,
+    )
+
+    this.items[technicianIndex] = technician
+
+    return
   }
 }
