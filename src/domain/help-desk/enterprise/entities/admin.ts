@@ -22,6 +22,14 @@ export class Admin extends User<AdminProps> {
     return this.props.jobTitle
   }
 
+  set department(value: string) {
+    this.props.department = value
+  }
+
+  set jobTitle(value: string) {
+    this.props.jobTitle = value
+  }
+
   static create(
     props: Optional<AdminProps, 'createdAt' | 'updatedAt' | 'role'>,
     id?: UniqueEntityID,

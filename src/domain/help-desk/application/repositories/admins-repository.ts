@@ -9,4 +9,5 @@ export abstract class IAdminsRepository {
     tenantId: string,
     params: PaginationParams,
   ): Promise<PaginatedResult<AuthUser>>
+  abstract save(admin: Admin): Promise<void>
 }
