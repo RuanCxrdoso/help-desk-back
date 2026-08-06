@@ -253,7 +253,7 @@ describe('Fetch technicians', () => {
       callerRole: 'EMPLOYEE',
       params: {
         page: 1,
-        perPage: 10,
+        perPage: 30,
         status: 'ALL',
       },
     })

@@ -4,6 +4,7 @@ import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repos
 import { Employee } from '@/domain/help-desk/enterprise/entities/employee'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
+import { makeEmployee } from 'test/factories/make-employee'
 
 let usersRepository: InMemoryUsersRepository
 let employeesRepository: InMemoryEmployeesRepository
@@ -43,6 +44,7 @@ describe('Fetch employees', () => {
   it('should be able to fetch all employees for a specific tenant', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-2',
+      callerRole: 'EMPLOYEE',
       params: { page: 1, perPage: 10, orderBy: 'firstName', order: 'asc' },
     })
 
@@ -67,6 +69,7 @@ describe('Fetch employees', () => {
   it('should be able to paginate employees list', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'EMPLOYEE',
       params: {
         page: 3,
         perPage: 5,
@@ -98,6 +101,7 @@ describe('Fetch employees', () => {
   it('should retrieve a empty list when search for a overflow page number', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'EMPLOYEE',
       params: {
         page: 100,
         perPage: 2,
@@ -126,6 +130,7 @@ describe('Fetch employees', () => {
   it('should be able to search an employee on list', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'EMPLOYEE',
       params: {
         q: 'Zack',
         page: 1,
@@ -156,6 +161,7 @@ describe('Fetch employees', () => {
   it('should be able to order the list', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'EMPLOYEE',
       params: {
         page: 1,
         perPage: 10,
@@ -181,6 +187,84 @@ describe('Fetch employees', () => {
           order: 'desc',
         }),
       )
+    }
+  })
+
+  it('should return only active records by default when no status is provided', async () => {
+    const inactiveEmployee = makeEmployee({
+      tenantId: new UniqueEntityID('tenant-1'),
+      isActive: false,
+    })
+
+    employeesRepository.items.push(inactiveEmployee)
+
+    const result = await sut.execute({
+      tenantId: 'tenant-1',
+      callerRole: 'EMPLOYEE',
+      params: { page: 1, perPage: 10 },
+    })
+
+    expect(result.isRight()).toBe(true)
+
+    if (result.isRight()) {
+      const containsInactive = result.value.employees.some(
+        (t) => t.isActive === false,
+      )
+      expect(containsInactive).toBe(false)
+    }
+  })
+
+  it('should allow an ADMIN to fetch ALL records, including inactive ones', async () => {
+    const inactiveEmployee = makeEmployee({
+      tenantId: new UniqueEntityID('tenant-1'),
+      isActive: false,
+    })
+
+    employeesRepository.items.push(inactiveEmployee)
+
+    const result = await sut.execute({
+      tenantId: 'tenant-1',
+      callerRole: 'ADMIN',
+      params: {
+        page: 1,
+        perPage: 30,
+        status: 'ALL',
+      },
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      const containsInactive = result.value.employees.some((t) =>
+        t.id.equals(inactiveEmployee.id),
+      )
+      expect(containsInactive).toBe(true)
+    }
+  })
+
+  it('should force ACTIVE filter if caller is an EMPLOYEE, ignoring the ALL status parameter', async () => {
+    const inactiveEmployee = makeEmployee({
+      tenantId: new UniqueEntityID('tenant-1'),
+      isActive: false,
+    })
+
+    employeesRepository.items.push(inactiveEmployee)
+
+    const result = await sut.execute({
+      tenantId: 'tenant-1',
+      callerRole: 'EMPLOYEE',
+      params: {
+        page: 1,
+        perPage: 30,
+        status: 'ALL',
+      },
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      const containsInactive = result.value.employees.some(
+        (t) => t.isActive === false,
+      )
+      expect(containsInactive).toBe(false)
     }
   })
 })
