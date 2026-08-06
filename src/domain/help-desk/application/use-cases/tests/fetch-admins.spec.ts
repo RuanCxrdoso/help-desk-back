@@ -4,6 +4,7 @@ import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repos
 import { Admin } from '@/domain/help-desk/enterprise/entities/admin'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
+import { makeAdmin } from 'test/factories/make-admin'
 
 let usersRepository: InMemoryUsersRepository
 let adminsRepository: InMemoryAdminsRepository
@@ -42,6 +43,7 @@ describe('Fetch admins', () => {
   it('should be able to fetch all admins for a specific tenant', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-2',
+      callerRole: 'ADMIN',
       params: { page: 1, perPage: 10, orderBy: 'firstName', order: 'asc' },
     })
 
@@ -66,6 +68,7 @@ describe('Fetch admins', () => {
   it('should be able to paginate admins list', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'ADMIN',
       params: {
         page: 3,
         perPage: 5,
@@ -97,6 +100,7 @@ describe('Fetch admins', () => {
   it('should retrieve a empty list when search for a overflow page number', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'ADMIN',
       params: {
         page: 100,
         perPage: 2,
@@ -125,6 +129,7 @@ describe('Fetch admins', () => {
   it('should be able to search an admin on list', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'ADMIN',
       params: {
         q: 'Zack',
         page: 1,
@@ -155,6 +160,7 @@ describe('Fetch admins', () => {
   it('should be able to order the list', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'ADMIN',
       params: {
         page: 1,
         perPage: 10,
@@ -180,6 +186,83 @@ describe('Fetch admins', () => {
           order: 'desc',
         }),
       )
+    }
+  })
+
+  it('should return only active records by default when no status is provided', async () => {
+    const inactiveAdmin = makeAdmin({
+      tenantId: new UniqueEntityID('tenant-1'),
+      isActive: false,
+    })
+    adminsRepository.items.push(inactiveAdmin)
+
+    const result = await sut.execute({
+      tenantId: 'tenant-1',
+      callerRole: 'ADMIN',
+      params: { page: 1, perPage: 30 },
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      const containsInactive = result.value.admins.some(
+        (t) => t.isActive === false,
+      )
+      expect(containsInactive).toBe(false)
+    }
+  })
+
+  it('should allow an ADMIN to fetch ALL records, including inactive ones', async () => {
+    const inactiveAdmin = makeAdmin({
+      tenantId: new UniqueEntityID('tenant-1'),
+      isActive: false,
+    })
+
+    adminsRepository.items.push(inactiveAdmin)
+
+    const result = await sut.execute({
+      tenantId: 'tenant-1',
+      callerRole: 'ADMIN',
+      params: {
+        page: 1,
+        perPage: 30,
+        status: 'ALL',
+      },
+    })
+
+    expect(result.isRight()).toBe(true)
+
+    if (result.isRight()) {
+      const containsInactive = result.value.admins.some((t) =>
+        t.id.equals(inactiveAdmin.id),
+      )
+      expect(containsInactive).toBe(true)
+    }
+  })
+
+  it('should force ACTIVE filter if caller is an EMPLOYEE, ignoring the ALL status parameter', async () => {
+    const inactiveAdmin = makeAdmin({
+      tenantId: new UniqueEntityID('tenant-1'),
+      isActive: false,
+    })
+    adminsRepository.items.push(inactiveAdmin)
+
+    const result = await sut.execute({
+      tenantId: 'tenant-1',
+      callerRole: 'EMPLOYEE',
+      params: {
+        page: 1,
+        perPage: 30,
+        status: 'ALL',
+      },
+    })
+
+    expect(result.isRight()).toBe(true)
+
+    if (result.isRight()) {
+      const containsInactive = result.value.admins.some(
+        (t) => t.isActive === false,
+      )
+      expect(containsInactive).toBe(false)
     }
   })
 })

@@ -3,9 +3,11 @@ import { IAdminsRepository } from '../repositories/admins-repository'
 import { Either, right } from '@/core/error/either'
 import { AuthUser } from '../../enterprise/entities/auth-user'
 import { PaginationParams } from '@/core/types/pagination'
+import { ROLE } from '@/core/enums/role'
 
 interface FetchAdminsUseCaseRequest {
   tenantId: string
+  callerRole: string
   params: PaginationParams
 }
 
@@ -29,10 +31,20 @@ export class FetchAdminsUseCase {
 
   async execute({
     tenantId,
+    callerRole,
     params,
   }: FetchAdminsUseCaseRequest): Promise<FetchAdminsUseCaseReponse> {
+    let effectiveStatus = params.status ?? 'ACTIVE'
+
+    if (callerRole === ROLE.EMPLOYEE || callerRole === ROLE.TECHNICIAN) {
+      effectiveStatus = 'ACTIVE'
+    }
+
     const { items, page, perPage, totalCount, totalPages, orderBy, order } =
-      await this.adminsRepository.findMany(tenantId, params)
+      await this.adminsRepository.findMany(tenantId, {
+        ...params,
+        status: effectiveStatus,
+      })
 
     return right({
       admins: items,
