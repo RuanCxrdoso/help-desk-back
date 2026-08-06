@@ -32,11 +32,24 @@ export class InMemoryEmployeesRepository implements IEmployeesRepository {
   }
 
   async findMany(tenantId: string, params: PaginationParams) {
-    const { q, page, perPage, orderBy, order } = params
+    const {
+      q,
+      page,
+      perPage,
+      orderBy = 'createdAt',
+      order = 'asc',
+      status = 'ACTIVE',
+    } = params
 
     let filteredItems = this.items.filter(
       (item) => item.tenantId.toString() === tenantId,
     )
+
+    if (status === 'ACTIVE') {
+      filteredItems = filteredItems.filter((item) => item.isActive === true)
+    } else if (status === 'INACTIVE') {
+      filteredItems = filteredItems.filter((item) => item.isActive === false)
+    }
 
     if (q) {
       filteredItems = filteredItems.filter(

@@ -4,6 +4,7 @@ import { InMemoryUsersRepository } from 'test/repositories/in-memory-users-repos
 import { Technician } from '@/domain/help-desk/enterprise/entities/technician'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { EmailValueObject } from '@/domain/help-desk/enterprise/entities/value-objects/email-value-object'
+import { makeTechnician } from 'test/factories/make-technician'
 
 let usersRepository: InMemoryUsersRepository
 let techniciansRepository: InMemoryTechniciansRepository
@@ -42,6 +43,7 @@ describe('Fetch technicians', () => {
   it('should be able to fetch all technicians for a specific tenant', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-2',
+      callerRole: 'TECHNICIAN',
       params: { page: 1, perPage: 10, orderBy: 'firstName', order: 'asc' },
     })
 
@@ -66,6 +68,7 @@ describe('Fetch technicians', () => {
   it('should be able to paginate technicians list', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'TECHNICIAN',
       params: {
         page: 3,
         perPage: 5,
@@ -97,6 +100,7 @@ describe('Fetch technicians', () => {
   it('should retrieve a empty list when search for a overflow page number', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'TECHNICIAN',
       params: {
         page: 100,
         perPage: 2,
@@ -125,6 +129,7 @@ describe('Fetch technicians', () => {
   it('should be able to search an technician on list', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'TECHNICIAN',
       params: {
         q: 'Zack',
         page: 1,
@@ -155,6 +160,7 @@ describe('Fetch technicians', () => {
   it('should be able to order the list', async () => {
     const result = await sut.execute({
       tenantId: 'tenant-1',
+      callerRole: 'TECHNICIAN',
       params: {
         page: 1,
         perPage: 10,
@@ -180,6 +186,84 @@ describe('Fetch technicians', () => {
           order: 'desc',
         }),
       )
+    }
+  })
+
+  it('should return only active records by default when no status is provided', async () => {
+    const inactiveTechnician = makeTechnician({
+      tenantId: new UniqueEntityID('tenant-1'),
+      isActive: false,
+    })
+
+    techniciansRepository.items.push(inactiveTechnician)
+
+    const result = await sut.execute({
+      tenantId: 'tenant-1',
+      callerRole: 'TECHNICIAN',
+      params: { page: 1, perPage: 10 },
+    })
+
+    expect(result.isRight()).toBe(true)
+
+    if (result.isRight()) {
+      const containsInactive = result.value.technicians.some(
+        (t) => t.isActive === false,
+      )
+      expect(containsInactive).toBe(false)
+    }
+  })
+
+  it('should allow an ADMIN to fetch ALL records, including inactive ones', async () => {
+    const inactiveTechnician = makeTechnician({
+      tenantId: new UniqueEntityID('tenant-1'),
+      isActive: false,
+    })
+
+    techniciansRepository.items.push(inactiveTechnician)
+
+    const result = await sut.execute({
+      tenantId: 'tenant-1',
+      callerRole: 'ADMIN',
+      params: {
+        page: 1,
+        perPage: 30,
+        status: 'ALL',
+      },
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      const containsInactive = result.value.technicians.some((t) =>
+        t.id.equals(inactiveTechnician.id),
+      )
+      expect(containsInactive).toBe(true)
+    }
+  })
+
+  it('should force ACTIVE filter if caller is an EMPLOYEE, ignoring the ALL status parameter', async () => {
+    const inactiveTechnician = makeTechnician({
+      tenantId: new UniqueEntityID('tenant-1'),
+      isActive: false,
+    })
+
+    techniciansRepository.items.push(inactiveTechnician)
+
+    const result = await sut.execute({
+      tenantId: 'tenant-1',
+      callerRole: 'EMPLOYEE',
+      params: {
+        page: 1,
+        perPage: 30,
+        status: 'ALL',
+      },
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      const containsInactive = result.value.technicians.some(
+        (t) => t.isActive === false,
+      )
+      expect(containsInactive).toBe(false)
     }
   })
 })

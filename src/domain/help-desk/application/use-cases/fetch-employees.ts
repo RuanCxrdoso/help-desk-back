@@ -2,16 +2,13 @@ import { Injectable } from '@nestjs/common'
 import { IEmployeesRepository } from '../repositories/employees-repository'
 import { Either, right } from '@/core/error/either'
 import { AuthUser } from '../../enterprise/entities/auth-user'
+import { PaginationParams } from '@/core/types/pagination'
+import { ROLE } from '@/core/enums/role'
 
 interface FetchEmployeesUseCaseRequest {
   tenantId: string
-  params: {
-    q?: string | null
-    page: number
-    perPage: number
-    orderBy: 'firstName' | 'email' | 'createdAt'
-    order: 'asc' | 'desc'
-  }
+  callerRole: string
+  params: PaginationParams
 }
 
 interface FetchEmployeesRightResponse {
@@ -34,10 +31,20 @@ export class FetchEmployeesUseCase {
 
   async execute({
     tenantId,
+    callerRole,
     params,
   }: FetchEmployeesUseCaseRequest): Promise<FetchEmployeesUseCaseReponse> {
+    let effectiveStatus = params.status ?? 'ACTIVE'
+
+    if (callerRole === ROLE.EMPLOYEE || callerRole === ROLE.TECHNICIAN) {
+      effectiveStatus = 'ACTIVE'
+    }
+
     const { items, page, perPage, totalCount, totalPages, orderBy, order } =
-      await this.employeesRepository.findMany(tenantId, params)
+      await this.employeesRepository.findMany(tenantId, {
+        ...params,
+        status: effectiveStatus,
+      })
 
     return right({
       employees: items,
