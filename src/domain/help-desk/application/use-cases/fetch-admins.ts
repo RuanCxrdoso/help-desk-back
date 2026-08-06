@@ -2,16 +2,11 @@ import { Injectable } from '@nestjs/common'
 import { IAdminsRepository } from '../repositories/admins-repository'
 import { Either, right } from '@/core/error/either'
 import { AuthUser } from '../../enterprise/entities/auth-user'
+import { PaginationParams } from '@/core/types/pagination'
 
 interface FetchAdminsUseCaseRequest {
   tenantId: string
-  params: {
-    q?: string | null
-    page: number
-    perPage: number
-    orderBy: 'firstName' | 'email' | 'createdAt'
-    order: 'asc' | 'desc'
-  }
+  params: PaginationParams
 }
 
 interface FetchAdminsRightResponse {
