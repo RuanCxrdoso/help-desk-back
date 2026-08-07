@@ -1,3 +1,5 @@
+import z from 'zod'
+
 export type UserStatusFilter = 'ACTIVE' | 'INACTIVE' | 'ALL'
 
 export interface PaginationParams {
@@ -20,3 +22,22 @@ export interface PaginatedResult<T> {
     order: 'asc' | 'desc'
   }
 }
+
+export const paginationQueryParamSchema = z.object({
+  q: z.string().optional(),
+  page: z.coerce.number().default(1),
+  perPage: z.coerce
+    .number()
+    .min(10, { error: 'Mínimo de 10 itens por página' })
+    .max(30, { error: 'Máximo de 30 itens por página' })
+    .default(10),
+  orderBy: z
+    .enum(['firstName', 'email', 'createdAt'])
+    .optional()
+    .default('firstName'),
+  order: z.enum(['asc', 'desc']).optional().default('asc'),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'ALL']).optional().default('ACTIVE'),
+  tenantId: z.uuid().optional(),
+})
+
+export type PaginationQueryParamDTO = z.infer<typeof paginationQueryParamSchema>
