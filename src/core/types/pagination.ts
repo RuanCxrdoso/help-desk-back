@@ -11,10 +11,12 @@ export interface PaginationParams {
 
 export interface PaginatedResult<T> {
   items: T[]
-  page: number
-  perPage: number
-  totalCount: number
-  totalPages: number
-  orderBy: 'firstName' | 'email' | 'createdAt'
-  order: 'asc' | 'desc'
+  meta: {
+    page: number
+    perPage: number
+    totalCount: number
+    totalPages: number
+    orderBy: 'firstName' | 'email' | 'createdAt'
+    order: 'asc' | 'desc'
+  }
 }
