@@ -61,7 +61,7 @@ export class PrismaTechniciansRepository implements ITechniciansRepository {
     }
     const whereClause: UserWhereInput = {
       tenantId,
-      role: ROLE.ADMIN,
+      role: ROLE.TECHNICIAN,
       isActive,
       ...(q && {
         OR: [
