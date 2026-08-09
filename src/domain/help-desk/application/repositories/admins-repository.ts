@@ -4,7 +4,7 @@ import { AuthUser } from '../../enterprise/entities/auth-user'
 
 export abstract class IAdminsRepository {
   abstract create(user: Admin): Promise<void>
-  abstract findById(id: string, tenantId: string): Promise<Admin | null>
+  abstract findById(id: string, tenantId?: string): Promise<Admin | null>
   abstract findMany(
     tenantId: string,
     params: PaginationParams,

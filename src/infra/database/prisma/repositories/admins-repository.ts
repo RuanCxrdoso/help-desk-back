@@ -21,7 +21,7 @@ export class PrismaAdminsRepository implements IAdminsRepository {
     })
   }
 
-  async findById(id: string, tenantId: string): Promise<Admin | null> {
+  async findById(id: string, tenantId?: string): Promise<Admin | null> {
     const admin = await this.prisma.user.findFirst({
       where: {
         id,

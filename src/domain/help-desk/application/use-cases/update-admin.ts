@@ -6,7 +6,7 @@ import { Admin } from '../../enterprise/entities/admin'
 
 export interface UpdateAdminUseCaseRequest {
   id: string
-  tenantId: string
+  tenantId?: string
   firstName: string
   lastName: string
   department: string
