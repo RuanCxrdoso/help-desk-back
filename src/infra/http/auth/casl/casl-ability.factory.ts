@@ -40,7 +40,17 @@ export class CaslAbilityFactory {
     }
 
     if (user.role === ROLE.ADMIN) {
-      can(Manage, 'User', { tenantId: user.tenantId })
+      can(Create, 'User', { tenantId: user.tenantId })
+      can(Read, 'User', { tenantId: user.tenantId })
+      can(Update, 'User', { tenantId: user.tenantId, id: user.sub })
+      can(Update, 'User', {
+        tenantId: user.tenantId,
+        role: { $in: [ROLE.EMPLOYEE, ROLE.TECHNICIAN] },
+      })
+      can(Delete, 'User', {
+        tenantId: user.tenantId,
+        role: { $in: [ROLE.EMPLOYEE, ROLE.TECHNICIAN] },
+      })
 
       can(Read, 'Tenant', { id: user.tenantId })
       can(Update, 'Tenant', { id: user.tenantId })
