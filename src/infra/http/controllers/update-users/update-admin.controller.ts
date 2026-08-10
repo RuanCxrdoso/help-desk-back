@@ -44,6 +44,7 @@ export class UpdateAdminController {
 
     const result = await this.updateAdminUseCase.execute({
       id: targetAdminId,
+      callerPayload: user,
       tenantId,
       ...body,
     })
