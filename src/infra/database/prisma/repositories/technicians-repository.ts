@@ -20,7 +20,7 @@ export class PrismaTechniciansRepository implements ITechniciansRepository {
     })
   }
 
-  async findById(id: string, tenantId: string): Promise<Technician | null> {
+  async findById(id: string, tenantId?: string): Promise<Technician | null> {
     const technician = await this.prisma.user.findFirst({
       where: {
         id,
