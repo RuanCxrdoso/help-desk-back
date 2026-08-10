@@ -20,7 +20,7 @@ export class PrismaEmployeesRepository implements IEmployeesRepository {
     })
   }
 
-  async findById(id: string, tenantId: string): Promise<Employee | null> {
+  async findById(id: string, tenantId?: string): Promise<Employee | null> {
     const employee = await this.prisma.user.findFirst({
       where: {
         id,
