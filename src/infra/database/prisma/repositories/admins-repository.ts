@@ -14,7 +14,7 @@ export class PrismaAdminsRepository implements IAdminsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(user: Admin): Promise<void> {
-    const adminPrisma = AdminMapper.toPrismaUser(user)
+    const adminPrisma = AdminMapper.toPrismaCreate(user)
 
     await this.prisma.user.create({
       data: adminPrisma,
@@ -99,8 +99,13 @@ export class PrismaAdminsRepository implements IAdminsRepository {
   }
 
   async save(admin: Admin): Promise<void> {
-    console.log(admin)
+    const prismaAdmin = AdminMapper.toPrismaUpsert(admin)
 
-    throw new Error('Method not implemented.')
+    await this.prisma.user.update({
+      where: {
+        id: admin.id.toString(),
+      },
+      data: prismaAdmin,
+    })
   }
 }
