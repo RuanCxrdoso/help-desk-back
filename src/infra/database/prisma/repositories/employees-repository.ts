@@ -19,6 +19,8 @@ export class PrismaEmployeesRepository implements IEmployeesRepository {
     await this.prisma.user.create({
       data: employeePrisma,
     })
+
+    return
   }
 
   async findById(id: string, tenantId?: string): Promise<Employee | null> {
@@ -107,5 +109,7 @@ export class PrismaEmployeesRepository implements IEmployeesRepository {
       },
       data: prismaEmployee,
     })
+
+    return
   }
 }
