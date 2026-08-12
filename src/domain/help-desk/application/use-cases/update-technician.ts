@@ -58,7 +58,7 @@ export class UpdateTechnicianUseCase {
     technician.supportLevel = supportLevel
     technician.specialties = specialties
 
-    await this.techniciansRepository.save(technician) // TODO: IMPLEMENTS SAVE METHOD IN PRISMA REPOSITORY (ADMINS, TECHNICIANS AND EMPLOYEES)
+    await this.techniciansRepository.save(technician)
 
     return right({ technician })
   }

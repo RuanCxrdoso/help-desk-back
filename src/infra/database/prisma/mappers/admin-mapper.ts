@@ -10,7 +10,7 @@ type PrismaAdminWithProfile = User & {
 }
 
 export class AdminMapper {
-  public static toPrismaUser(raw: Admin): UserCreateInput {
+  public static toPrismaCreate(raw: Admin): UserCreateInput {
     return {
       id: raw.id.toString(),
       role: ROLE.ADMIN,
@@ -36,7 +36,7 @@ export class AdminMapper {
     }
   }
 
-  public static toPrismaUpdate(raw: Admin): UserUpdateInput {
+  public static toPrismaUpsert(raw: Admin): UserUpdateInput {
     return {
       id: raw.id.toString(),
       role: ROLE.ADMIN,
@@ -54,13 +54,15 @@ export class AdminMapper {
         },
       },
       adminProfile: {
-        create: {
-          department: raw.department,
-          jobTitle: raw.jobTitle,
-        },
-        update: {
-          department: raw.department,
-          jobTitle: raw.jobTitle,
+        upsert: {
+          create: {
+            department: raw.department,
+            jobTitle: raw.jobTitle,
+          },
+          update: {
+            department: raw.department,
+            jobTitle: raw.jobTitle,
+          },
         },
       },
     }
