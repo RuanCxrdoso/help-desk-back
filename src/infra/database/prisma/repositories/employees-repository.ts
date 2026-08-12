@@ -12,8 +12,9 @@ import { AuthUserMapper } from '../mappers/auth-user-mapper'
 @Injectable()
 export class PrismaEmployeesRepository implements IEmployeesRepository {
   constructor(private readonly prisma: PrismaService) {}
+
   async create(user: Employee): Promise<void> {
-    const employeePrisma = EmployeeMapper.toPrismaUser(user)
+    const employeePrisma = EmployeeMapper.toPrismaCreate(user)
 
     await this.prisma.user.create({
       data: employeePrisma,
@@ -98,8 +99,13 @@ export class PrismaEmployeesRepository implements IEmployeesRepository {
   }
 
   async save(employee: Employee): Promise<void> {
-    console.log(employee)
+    const prismaEmployee = EmployeeMapper.toPrismaUpsert(employee)
 
-    throw new Error('Method not implemented.')
+    await this.prisma.user.update({
+      where: {
+        id: employee.id.toString(),
+      },
+      data: prismaEmployee,
+    })
   }
 }
