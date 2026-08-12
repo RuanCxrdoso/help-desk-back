@@ -10,7 +10,7 @@ type PrismaEmployeeWithProfile = User & {
 }
 
 export class EmployeeMapper {
-  public static toPrismaUser(raw: Employee): UserCreateInput {
+  public static toPrismaCreate(raw: Employee): UserCreateInput {
     return {
       id: raw.id.toString(),
       firstName: raw.firstName,
@@ -36,7 +36,7 @@ export class EmployeeMapper {
     }
   }
 
-  public static toPrismaUpdate(raw: Employee): UserUpdateInput {
+  public static toPrismaUpsert(raw: Employee): UserUpdateInput {
     return {
       id: raw.id.toString(),
       firstName: raw.firstName,
@@ -53,15 +53,17 @@ export class EmployeeMapper {
         },
       },
       employeeProfile: {
-        create: {
-          department: raw.department,
-          jobTitle: raw.jobTitle,
-          location: raw.location,
-        },
-        update: {
-          department: raw.department,
-          jobTitle: raw.jobTitle,
-          location: raw.location,
+        upsert: {
+          create: {
+            department: raw.department,
+            jobTitle: raw.jobTitle,
+            location: raw.location,
+          },
+          update: {
+            department: raw.department,
+            jobTitle: raw.jobTitle,
+            location: raw.location,
+          },
         },
       },
     }
