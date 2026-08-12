@@ -37,7 +37,6 @@ export const paginationQueryParamSchema = z.object({
     .default('firstName'),
   order: z.enum(['asc', 'desc']).optional().default('asc'),
   status: z.enum(['ACTIVE', 'INACTIVE', 'ALL']).optional().default('ACTIVE'),
-  tenantId: z.uuid().optional(),
 })
 
 export type PaginationQueryParamDTO = z.infer<typeof paginationQueryParamSchema>

@@ -18,7 +18,7 @@ export const TargetTenant = createParamDecorator(
 
     if (!requestedTenantId) {
       throw new BadRequestException(
-        'SuperAdmins devem informar o cabeçalho X-Tenant-ID para esta operação',
+        'SuperAdmins devem informar o cabeçalho x-tenant-id para esta operação',
       )
     }
 

@@ -1,6 +1,5 @@
 import { FetchAdminsUseCase } from '@/domain/help-desk/application/use-cases/fetch-admins'
 import {
-  BadRequestException,
   Controller,
   Get,
   HttpCode,
@@ -18,8 +17,8 @@ import {
   type PaginationQueryParamDTO,
   paginationQueryParamSchema,
 } from '@/core/types/pagination'
-import { ROLE } from '@/core/enums/role'
 import { HttpUserPresenter } from '@/infra/presenters/http-user.presenter'
+import { TargetTenant } from '../../utils/decorators/target-tenant.decorator'
 
 const paginationQueryParamPipe = new ZodValidationPipe(
   paginationQueryParamSchema,
@@ -34,26 +33,13 @@ export class FetchAdminsController {
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability) => ability.can(Action.Read, 'User'))
   async handle(
-    @Query(paginationQueryParamPipe)
-    { tenantId: paramTenantId, ...params }: PaginationQueryParamDTO,
+    @Query(paginationQueryParamPipe) params: PaginationQueryParamDTO,
+    @TargetTenant() tenantId: string,
     @User() user: TokenPayload,
   ) {
-    let tenantId: string
-
-    const { role, tenantId: tokenTenantId } = user
-
-    if (role === ROLE.SUPER_ADMIN) {
-      if (!paramTenantId) {
-        throw new BadRequestException('Missing tenantId parameter')
-      }
-      tenantId = paramTenantId
-    } else {
-      tenantId = tokenTenantId
-    }
-
     const result = await this.fetchAdminsUseCase.execute({
       tenantId,
-      callerRole: role,
+      callerRole: user.role,
       params,
     })
 
