@@ -4,16 +4,21 @@ import { DeleteEmployeeUseCase } from '../delete-employee'
 import { makeEmployee } from 'test/factories/make-employee'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { NotFoundError } from '../../errors/not-found-error'
+import { FakeAuthorizationService } from 'test/services/authorization-service'
+import { ROLE } from '@/core/enums/role'
+import { NotAllowedError } from '../../errors/not-allowed-error'
 
+let authorizationService: FakeAuthorizationService
 let usersRepository: InMemoryUsersRepository
 let employeesRepository: InMemoryEmployeesRepository
 let sut: DeleteEmployeeUseCase
 
 describe('Delete Employee', () => {
   beforeEach(() => {
+    authorizationService = new FakeAuthorizationService()
     usersRepository = new InMemoryUsersRepository()
     employeesRepository = new InMemoryEmployeesRepository(usersRepository)
-    sut = new DeleteEmployeeUseCase(employeesRepository)
+    sut = new DeleteEmployeeUseCase(employeesRepository, authorizationService)
 
     const employee = makeEmployee(
       {
@@ -30,18 +35,39 @@ describe('Delete Employee', () => {
     const result = await sut.execute({
       id: 'employee-1',
       tenantId: 'tenant-1',
+      callerPayload: {
+        sub: 'user-1',
+        tenantId: 'tenant-1',
+        role: ROLE.ADMIN,
+      },
     })
 
     expect(result.isRight()).toBe(true)
 
     expect(employeesRepository.items[0].isActive).toBe(false)
     expect(employeesRepository.items[0].deletedAt).toBeInstanceOf(Date)
+
+    expect(authorizationService.authorizeSpy).toHaveBeenCalledWith(
+      {
+        sub: 'user-1',
+        tenantId: 'tenant-1',
+        role: ROLE.ADMIN,
+      },
+      'delete',
+      'User',
+      expect.anything(),
+    )
   })
 
   it('should not be able to delete a non-existent employee', async () => {
     const result = await sut.execute({
       id: 'invalid-id',
       tenantId: 'tenant-1',
+      callerPayload: {
+        sub: 'user-1',
+        tenantId: 'tenant-1',
+        role: ROLE.ADMIN,
+      },
     })
 
     expect(result.isLeft()).toBe(true)
@@ -55,6 +81,11 @@ describe('Delete Employee', () => {
     const result = await sut.execute({
       id: 'employee-1',
       tenantId: 'tenant-2',
+      callerPayload: {
+        sub: 'user-1',
+        tenantId: 'tenant-2',
+        role: ROLE.ADMIN,
+      },
     })
 
     expect(result.isLeft()).toBe(true)
@@ -62,5 +93,27 @@ describe('Delete Employee', () => {
     if (result.isLeft()) {
       expect(result.value).toBeInstanceOf(NotFoundError)
     }
+  })
+
+  it('should not be able to delete an employee if not authorized', async () => {
+    authorizationService.mockAuthorization(false)
+
+    const result = await sut.execute({
+      id: 'employee-1',
+      tenantId: 'tenant-1',
+      callerPayload: {
+        sub: 'user-1',
+        tenantId: 'tenant-1',
+        role: ROLE.ADMIN,
+      },
+    })
+
+    expect(result.isLeft()).toBe(true)
+
+    if (result.isLeft()) {
+      expect(result.value).toBeInstanceOf(NotAllowedError)
+    }
+
+    expect(employeesRepository.items[0].isActive).toBe(true)
   })
 })
