@@ -84,12 +84,7 @@ export class InMemoryAdminsRepository implements IAdminsRepository {
 
     return {
       items: paginatedItems,
-      page,
-      perPage,
-      totalCount,
-      totalPages,
-      orderBy,
-      order,
+      meta: { page, perPage, totalCount, totalPages, orderBy, order },
     }
   }
 
