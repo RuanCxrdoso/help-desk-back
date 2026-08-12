@@ -10,7 +10,7 @@ type PrismaTechnicianWithProfile = User & {
 }
 
 export class TechnicianMapper {
-  public static toPrismaUser(raw: Technician): UserCreateInput {
+  public static toPrismaCreate(raw: Technician): UserCreateInput {
     return {
       id: raw.id.toString(),
       firstName: raw.firstName,
@@ -34,7 +34,7 @@ export class TechnicianMapper {
     }
   }
 
-  public static toPrismaUpdate(raw: Technician): UserUpdateInput {
+  public static toPrismaUpsert(raw: Technician): UserUpdateInput {
     return {
       id: raw.id.toString(),
       firstName: raw.firstName,
@@ -50,13 +50,15 @@ export class TechnicianMapper {
         },
       },
       technicianProfile: {
-        create: {
-          supportLevel: raw.supportLevel,
-          specialties: raw.specialties,
-        },
-        update: {
-          supportLevel: raw.supportLevel,
-          specialties: raw.specialties,
+        upsert: {
+          create: {
+            supportLevel: raw.supportLevel,
+            specialties: raw.specialties,
+          },
+          update: {
+            supportLevel: raw.supportLevel,
+            specialties: raw.specialties,
+          },
         },
       },
     }
