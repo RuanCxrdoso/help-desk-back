@@ -19,6 +19,8 @@ export class PrismaAdminsRepository implements IAdminsRepository {
     await this.prisma.user.create({
       data: adminPrisma,
     })
+
+    return
   }
 
   async findById(id: string, tenantId?: string): Promise<Admin | null> {
@@ -107,5 +109,7 @@ export class PrismaAdminsRepository implements IAdminsRepository {
       },
       data: prismaAdmin,
     })
+
+    return
   }
 }

@@ -12,12 +12,15 @@ import { AuthUserMapper } from '../mappers/auth-user-mapper'
 @Injectable()
 export class PrismaTechniciansRepository implements ITechniciansRepository {
   constructor(private readonly prisma: PrismaService) {}
+
   async create(user: Technician): Promise<void> {
     const technicianPrisma = TechnicianMapper.toPrismaCreate(user)
 
     await this.prisma.user.create({
       data: technicianPrisma,
     })
+
+    return
   }
 
   async findById(id: string, tenantId?: string): Promise<Technician | null> {
@@ -106,5 +109,7 @@ export class PrismaTechniciansRepository implements ITechniciansRepository {
       },
       data: prismaTechnician,
     })
+
+    return
   }
 }
