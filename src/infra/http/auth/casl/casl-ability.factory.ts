@@ -126,6 +126,9 @@ export class CaslAbilityFactory {
 
     return build({
       detectSubjectType: (item: any) => {
+        if (item && item.__caslSubjectType__) {
+          return item.__caslSubjectType__ as ExtractSubjectType<Subjects>
+        }
         return item.constructor as ExtractSubjectType<Subjects>
       },
     })
