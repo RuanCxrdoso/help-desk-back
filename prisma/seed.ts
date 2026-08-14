@@ -123,6 +123,7 @@ async function main() {
       lastName: 'Inactive',
       role: ROLE.ADMIN,
       isActive: false,
+      deletedAt: new Date(),
       adminProfile: {
         create: {
           department: 'IT',
@@ -159,6 +160,7 @@ async function main() {
       lastName: 'Inactive',
       role: ROLE.TECHNICIAN,
       isActive: false,
+      deletedAt: new Date(),
       technicianProfile: {
         create: {
           supportLevel: 1,
@@ -215,6 +217,7 @@ async function main() {
       lastName: 'Inactive',
       role: ROLE.EMPLOYEE,
       isActive: false,
+      deletedAt: new Date(),
       employeeProfile: {
         create: {
           department: 'HR',

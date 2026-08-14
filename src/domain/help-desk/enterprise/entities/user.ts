@@ -75,6 +75,13 @@ export abstract class User<Props extends UserProps> extends Entity<Props> {
     this.touch()
   }
 
+  deactivate() {
+    this.props.isActive = false
+    this.props.deletedAt = new Date()
+
+    this.touch()
+  }
+
   private touch() {
     this.props.updatedAt = new Date()
   }

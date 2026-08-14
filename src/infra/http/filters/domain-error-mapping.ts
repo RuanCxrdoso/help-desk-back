@@ -5,12 +5,14 @@ import { NotFoundError } from '@/domain/help-desk/application/errors/not-found-e
 import { NotAllowedError } from '@/domain/help-desk/application/errors/not-allowed-error'
 import { InvalidCredentialsError } from '@/domain/help-desk/application/errors/invalid-credentials-error'
 import { DomainError } from '@/core/error/domain-error'
+import { UserAlreadyDeletedError } from '@/domain/help-desk/application/errors/user-already-deleted-error'
 
 type ErrorConstructor = new (...args: any[]) => DomainError
 
 export const domainErrorMapping = new Map<ErrorConstructor, HttpStatus>([
   [TenantAlreadyExistsError, HttpStatus.CONFLICT],
   [UserAlreadyExistsError, HttpStatus.CONFLICT],
+  [UserAlreadyDeletedError, HttpStatus.CONFLICT],
   [NotFoundError, HttpStatus.NOT_FOUND],
   [NotAllowedError, HttpStatus.FORBIDDEN],
   [InvalidCredentialsError, HttpStatus.UNAUTHORIZED],

@@ -12,7 +12,7 @@ export class PrismaTenantAndAdminRegisterGatewayRepository implements ITenantAnd
 
   async register(tenant: Tenant, admin: Admin): Promise<void> {
     const tenantPrisma = TenantMapper.toPrisma(tenant)
-    const adminPrisma = AdminMapper.toPrismaUser(admin)
+    const adminPrisma = AdminMapper.toPrismaCreate(admin)
 
     await this.prisma.$transaction(async (tx) => {
       await tx.tenant.create({

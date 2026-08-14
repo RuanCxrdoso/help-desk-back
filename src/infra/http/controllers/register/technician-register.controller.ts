@@ -12,7 +12,7 @@ import { CheckPolicies } from '../../auth/casl/check-policies.decorator'
 import { Action } from '../../auth/casl/action'
 import z from 'zod'
 import { ZodValidationPipe } from '../../utils/pipes/zod-validation.pipe'
-import { TenantId } from '../../utils/decorators/target-tenant.decorator'
+import { TargetTenant } from '../../utils/decorators/target-tenant.decorator'
 
 const technicianRegisterBodySchema = z.object({
   firstName: z.string().min(2, { error: 'First name must be provided' }),
@@ -50,7 +50,7 @@ export class TechnicianRegisterController {
   @CheckPolicies((ability) => ability.can(Action.Create, 'User'))
   async handle(
     @Body(technicianRegisterBodyPipe) body: TechnicianRegisterBodyDTO,
-    @TenantId() tenantId: string,
+    @TargetTenant() tenantId: string,
   ) {
     const {
       firstName,

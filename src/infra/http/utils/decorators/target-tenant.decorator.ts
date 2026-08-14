@@ -3,25 +3,25 @@ import {
   createParamDecorator,
   ExecutionContext,
 } from '@nestjs/common'
-import { TokenPayload } from '../../auth/jwt.strategy'
 import { ROLE } from '@/core/enums/role'
 
-export const TenantId = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): string => {
+export const TargetTenant = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest()
-    const user = request.user as TokenPayload
-    const body = request.body
+    const user = request.user
 
-    if (user.role === ROLE.SUPER_ADMIN) {
-      if (!body.tenantId) {
-        throw new BadRequestException(
-          'A tenant context is required to register an administrator.',
-        )
-      }
-
-      return String(body.tenantId)
+    if (user.role !== ROLE.SUPER_ADMIN) {
+      return user.tenantId
     }
 
-    return user.tenantId
+    const requestedTenantId = request.headers['x-tenant-id']
+
+    if (!requestedTenantId) {
+      throw new BadRequestException(
+        'SuperAdmins devem informar o cabeçalho x-tenant-id para esta operação',
+      )
+    }
+
+    return requestedTenantId
   },
 )

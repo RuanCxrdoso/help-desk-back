@@ -7,6 +7,8 @@ import { JwtAuthGuard } from './jwt-auth.guard'
 import { CaslAbilityFactory } from './casl/casl-ability.factory'
 import { PoliciesGuard } from './casl/policies.guard'
 import { DatabaseModule } from '@/infra/database/database.module'
+import { IAuthorizationService } from '@/domain/help-desk/application/auth/authorization.service'
+import { CaslAuthorizationService } from './casl/casl-authorization.service'
 
 @Module({
   imports: [EnvModule, PassportModule, DatabaseModule],
@@ -15,10 +17,14 @@ import { DatabaseModule } from '@/infra/database/database.module'
     CaslAbilityFactory,
     PoliciesGuard,
     {
+      provide: IAuthorizationService,
+      useClass: CaslAuthorizationService,
+    },
+    {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
   ],
-  exports: [CaslAbilityFactory, PoliciesGuard],
+  exports: [CaslAbilityFactory, PoliciesGuard, IAuthorizationService],
 })
 export class AuthModule {}

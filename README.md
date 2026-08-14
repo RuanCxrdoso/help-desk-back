@@ -14,6 +14,15 @@ Abaixo estão todos os requisitos funcionais do sistema, modelados como Use Case
 - [ ✅ ] `GetEmployeeProfileUseCase`: Retorna dados detalhados do perfil de um Funcionário.
 - [ ✅ ] `GetTechnicianProfileUseCase`: Retorna dados detalhados do perfil de um Técnico.
 - [ ✅ ] `GetSuperAdminProfileUseCase`: Retorna dados detalhados do perfil de um Super Administrador.
+- [ ✅ ] `UpdateAdminUseCase`: Atualização de dados do perfil de um Administrador.
+- [ ✅ ] `UpdateEmployeeUseCase`: Atualização de dados do perfil de um Funcionário.
+- [ ✅ ] `UpdateTechnicianUseCase`: Atualização de dados do perfil de um Técnico.
+- [ ✅ ] `DeleteAdminUseCase`: Exclusão de um Administrador.
+- [ ✅ ] `DeleteEmployeeUseCase`: Exclusão de um Funcionário.
+- [ ✅ ] `DeleteTechnicianUseCase`: Exclusão de um Técnico.
+- [ ✅ ] `FetchAdminsUseCase`: Listagem paginada de Administradores.
+- [ ✅ ] `FetchEmployeesUseCase`: Listagem paginada de Funcionários.
+- [ ✅ ] `FetchTechniciansUseCase`: Listagem paginada de Técnicos.
 
 ### Fase 2: Infraestrutura de Arquivos (Storage)
 - [ ] `UploadAndCreateAttachmentUseCase`: Recebe um arquivo via `multipart/form-data`, valida formato/tamanho, faz o upload para o Storage (ex: AWS S3 ou R2) e persiste o registro lógico no banco.
@@ -50,15 +59,17 @@ O controle de acesso foi implementado utilizando a biblioteca **@casl/ability**,
 
 | Recurso / Ação | Funcionário (`EMPLOYEE`) | Técnico (`TECHNICIAN`) | Admin Inquilino (`ADMIN`) | Regras de Segurança e Domínio (CASL) |
 | :--- | :--- | :--- | :--- | :--- |
-| **Autenticação e Perfil** | Ler/Atualizar (Próprio) | Ler/Atualizar (Próprio) | Gerenciar (Todos do Inquilino)| Regra anti-orfandade: Usuários (incluindo Admin) não deletam a própria conta. |
-| **Listar Usuários** | Permitido (Mesmo Tenant) | Permitido (Mesmo Tenant) | Permitido (Todos) | Permite visibilidade interna. Gestão (Create/Delete) é exclusiva de Admins. |
-| **Criar Ticket** | Permitido | Negado | Permitido | Apenas solicitantes reais (Employees) e Admins abrem chamados. |
-| **Listar/Ler Tickets** | Permitido (Apenas seus) | Permitido (Todos) | Permitido (Todos) | Funcionários veem apenas tickets onde `employeeId === user.sub`. |
-| **Atualizar Dados** | Permitido (Apenas seus) | Permitido (Seus ou Sem dono)| Permitido | **Imutabilidade:** Bloqueado se `status` for `CLOSED`, `CANCELLED` ou `RESOLVED`. |
-| **Deletar Ticket** | Negado | Negado | Permitido | Apenas Admins deletam. SuperAdmin gerencia cross-tenant. |
-| **Assumir (`Assign`)** | Negado | Permitido (Sem dono) | Permitido | Válido apenas para tickets `OPEN` ou `IN_PROGRESS` sem técnico atribuído. |
-| **Desatribuir/Resolver**| Negado | Permitido (Apenas seus) | Permitido | Travado na Entidade se o status não for `OPEN` ou `IN_PROGRESS`. |
-| **Cancelar / Reabrir** | Permitido (Apenas seus) | Permitido (Apenas seus) | Permitido | Reabrir move para `IN_PROGRESS` se houver técnico, ou `OPEN` se estiver vago. |
-| **Fechar Ticket** | Permitido (Apenas seus) | Negado | Permitido | **Fluxo de Confirmação:** Só é permitido fechar tickets com status `RESOLVED`. |
+| **Usuários (User)** | Ler (Todos do Tenant) <br> Atualizar (Próprio) | Ler (Todos do Tenant) <br> Atualizar (Próprio) | Criar/Ler (Todos do Tenant) <br> Atualizar/Deletar (Técnicos e Funcionários) <br> Atualizar (Próprio) | Regra anti-orfandade: Usuários não deletam a própria conta. Admins não alteram nem deletam outros Admins. |
+| **Empresa (Tenant)**| Ler (Próprio Tenant) | Ler (Próprio Tenant) | Ler/Atualizar (Próprio Tenant) | Somente Admin pode atualizar os dados do Tenant. |
+| **Criar Ticket** | Permitido | Negado | Permitido | Técnicos não abrem chamados, apenas atendem. |
+| **Ler Tickets** | Permitido (Apenas seus) | Permitido (Todos do Tenant) | Permitido (Todos do Tenant) | Funcionários veem apenas tickets onde são os solicitantes (`employeeId`). |
+| **Atualizar Tickets**| Permitido (Apenas seus) | Permitido (Apenas seus ou sem dono) | Permitido (Todos do Tenant) | **Imutabilidade:** Bloqueado se ticket estiver `CLOSED`, `CANCELLED` ou `RESOLVED`. |
+| **Deletar Ticket** | Negado | Negado | Permitido (Todos do Tenant) | Apenas Admins deletam tickets. |
+| **Assumir (`Assign`)**| Negado | Permitido (Sem dono) | Permitido (Todos do Tenant) | Técnico só pode assumir chamados que estão sem técnico (`technicianId = null`). |
+| **Desatribuir (`Unassign`)**| Negado | Permitido (Apenas seus) | Permitido (Todos do Tenant) | Técnico só desatribui chamados que estão sob sua responsabilidade. |
+| **Resolver (`Resolve`)** | Negado | Permitido (Apenas seus) | Permitido (Todos do Tenant) | Técnico finaliza a etapa técnica reportando resolução. |
+| **Cancelar (`Cancel`)** | Permitido (Apenas seus) | Permitido (Apenas seus) | Permitido (Todos do Tenant) | Solicitante ou Técnico cancelam se o chamado perder o sentido. |
+| **Reabrir (`Reopen`)**| Permitido (Apenas seus) | Permitido (Apenas seus) | Permitido (Todos do Tenant) | Se o problema persistir após resolvido, pode ser reaberto. |
+| **Fechar (`Close`)** | Permitido (Apenas seus) | Negado | Permitido (Todos do Tenant) | Funcionário aprova a resolução fechando o chamado definitivamente. Técnico não fecha. |
 
 > **Nota de Sistema (`SUPER_ADMIN`):** O Super Administrador possui permissão global e cross-tenant (`Manage: 'all'`). Ele administra os Tenants da plataforma SaaS e gerencia assinaturas, sendo tecnicamente bloqueado apenas de executar a exclusão do próprio perfil.

@@ -1,39 +1,50 @@
-import { ROLE } from '@/core/enums/role'
 import { ITechniciansRepository } from '../repositories/technicians-repository'
 import { Either, left, right } from '@/core/error/either'
-import { NotAllowedError } from '../errors/not-allowed-error'
 import { NotFoundError } from '../errors/not-found-error'
 import { Technician } from '../../enterprise/entities/technician'
 import { Injectable } from '@nestjs/common'
+import { TokenPayload } from '@/infra/http/auth/jwt.strategy'
+import { NotAllowedError } from '../errors/not-allowed-error'
+import { IAuthorizationService } from '../auth/authorization.service'
 
 interface GetTechnicianProfileUseCaseRequest {
   id: string
   tenantId: string
-  role: string
+  callerPayload: TokenPayload
 }
 
 type GetTechnicianProfileUseCaseResponse = Either<
-  NotAllowedError | NotFoundError,
+  NotFoundError | NotAllowedError,
   { technician: Technician }
 >
 
 @Injectable()
 export class GetTechnicianProfileUseCase {
-  constructor(private techniciansRepository: ITechniciansRepository) {}
+  constructor(
+    private readonly techniciansRepository: ITechniciansRepository,
+    private readonly authorizationService: IAuthorizationService,
+  ) {}
 
   async execute({
     id,
     tenantId,
-    role,
+    callerPayload,
   }: GetTechnicianProfileUseCaseRequest): Promise<GetTechnicianProfileUseCaseResponse> {
-    if (role !== ROLE.TECHNICIAN) {
-      return left(new NotAllowedError())
-    }
-
     const technician = await this.techniciansRepository.findById(id, tenantId)
 
     if (!technician) {
       return left(new NotFoundError())
+    }
+
+    if (
+      !this.authorizationService.authorize(
+        callerPayload,
+        'read',
+        'User',
+        technician,
+      )
+    ) {
+      return left(new NotAllowedError())
     }
 
     return right({ technician })

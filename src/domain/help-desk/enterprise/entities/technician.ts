@@ -18,6 +18,14 @@ export class Technician extends User<TechnicianProps> {
     return this.props.specialties
   }
 
+  set supportLevel(value: number) {
+    this.props.supportLevel = value
+  }
+
+  set specialties(value: string[]) {
+    this.props.specialties = value
+  }
+
   static create(
     props: Optional<TechnicianProps, 'createdAt' | 'updatedAt' | 'role'>,
     id?: UniqueEntityID,
