@@ -5,6 +5,7 @@ import { NotFoundError } from '../errors/not-found-error'
 import { IAuthorizationService } from '../auth/authorization.service'
 import { TokenPayload } from '@/infra/http/auth/jwt.strategy'
 import { NotAllowedError } from '../errors/not-allowed-error'
+import { UserAlreadyDeletedError } from '../errors/user-already-deleted-error'
 
 export interface DeleteAdminUseCaseRequest {
   id: string
@@ -12,7 +13,10 @@ export interface DeleteAdminUseCaseRequest {
   callerPayload: TokenPayload
 }
 
-type DeleteAdminUseCaseResponse = Either<NotFoundError | NotAllowedError, null>
+type DeleteAdminUseCaseResponse = Either<
+  NotFoundError | UserAlreadyDeletedError | NotAllowedError,
+  null
+>
 
 @Injectable()
 export class DeleteAdminUseCase {
@@ -30,6 +34,10 @@ export class DeleteAdminUseCase {
 
     if (!admin) {
       return left(new NotFoundError())
+    }
+
+    if (!admin.isActive && admin.deletedAt) {
+      return left(new UserAlreadyDeletedError())
     }
 
     if (

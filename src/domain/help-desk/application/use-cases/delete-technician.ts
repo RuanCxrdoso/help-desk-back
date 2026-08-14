@@ -5,6 +5,7 @@ import { NotFoundError } from '../errors/not-found-error'
 import { TokenPayload } from '@/infra/http/auth/jwt.strategy'
 import { NotAllowedError } from '../errors/not-allowed-error'
 import { IAuthorizationService } from '../auth/authorization.service'
+import { UserAlreadyDeletedError } from '../errors/user-already-deleted-error'
 
 export interface DeleteTechnicianUseCaseRequest {
   id: string
@@ -13,7 +14,7 @@ export interface DeleteTechnicianUseCaseRequest {
 }
 
 type DeleteTechnicianUseCaseResponse = Either<
-  NotFoundError | NotAllowedError,
+  NotFoundError | UserAlreadyDeletedError | NotAllowedError,
   null
 >
 
@@ -33,6 +34,10 @@ export class DeleteTechnicianUseCase {
 
     if (!technician) {
       return left(new NotFoundError())
+    }
+
+    if (!technician.isActive && technician.deletedAt) {
+      return left(new UserAlreadyDeletedError())
     }
 
     if (
