@@ -38,7 +38,7 @@ export class EmployeeRegisterController {
   @Post('/register')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability) => ability.can(Action.Manage, 'User'))
+  @CheckPolicies((ability) => ability.can(Action.Create, 'User'))
   async handle(
     @Body(registerEmployeePipe) body: EmployeeRegisterBodyDTO,
     @TargetTenant() tenantId: string,
