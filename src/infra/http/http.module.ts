@@ -37,7 +37,7 @@ import { DeleteTechnicianController } from './controllers/delete-users/delete-te
 import { FetchAdminsController } from './controllers/fetch-users/fetch-admins.controller'
 import { FetchEmployeesController } from './controllers/fetch-users/fetch-employees.controller'
 import { UpdateAdminController } from './controllers/update-users/update-admin.controller'
-import { UpdateEmployeeController } from './controllers/update-users/update-employees.controller'
+import { UpdateEmployeeController } from './controllers/update-users/update-employee.controller'
 import { UpdateTechnicianController } from './controllers/update-users/update-technician.controller'
 
 @Module({
