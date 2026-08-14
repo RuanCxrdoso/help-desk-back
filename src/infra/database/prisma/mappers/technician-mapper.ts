@@ -18,7 +18,9 @@ export class TechnicianMapper {
       email: raw.email.value,
       password: raw.password,
       role: ROLE.TECHNICIAN,
+      isActive: raw.isActive,
       createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt ?? undefined,
       deletedAt: raw.deletedAt,
       tenant: {
         connect: {
@@ -42,7 +44,9 @@ export class TechnicianMapper {
       email: raw.email.value,
       password: raw.password,
       role: ROLE.TECHNICIAN,
+      isActive: raw.isActive,
       createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt ?? undefined,
       deletedAt: raw.deletedAt,
       tenant: {
         connect: {

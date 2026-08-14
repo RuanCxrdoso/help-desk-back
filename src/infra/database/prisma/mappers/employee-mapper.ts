@@ -20,6 +20,7 @@ export class EmployeeMapper {
       role: ROLE.EMPLOYEE,
       isActive: raw.isActive,
       createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt ?? undefined,
       deletedAt: raw.deletedAt,
       tenant: {
         connect: {
@@ -46,6 +47,7 @@ export class EmployeeMapper {
       role: ROLE.EMPLOYEE,
       isActive: raw.isActive,
       createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt ?? undefined,
       deletedAt: raw.deletedAt,
       tenant: {
         connect: {

@@ -15,6 +15,7 @@ export class SuperAdminMapper {
       email: raw.email.value,
       password: raw.password,
       createdAt: raw.createdAt,
+      updatedAt: raw.updatedAt ?? undefined,
     }
   }
 
