@@ -40,11 +40,12 @@ export class FetchAdminsUseCase {
       effectiveStatus = 'ACTIVE'
     }
 
-    const { items, page, perPage, totalCount, totalPages, orderBy, order } =
-      await this.adminsRepository.findMany(tenantId, {
-        ...params,
-        status: effectiveStatus,
-      })
+    const { items, meta } = await this.adminsRepository.findMany(tenantId, {
+      ...params,
+      status: effectiveStatus,
+    })
+
+    const { page, perPage, totalCount, totalPages, orderBy, order } = meta
 
     return right({
       admins: items,

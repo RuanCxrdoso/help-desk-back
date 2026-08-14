@@ -12,7 +12,7 @@ import z from 'zod'
 import { PoliciesGuard } from '../../auth/casl/policies.guard'
 import { CheckPolicies } from '../../auth/casl/check-policies.decorator'
 import { Action } from '../../auth/casl/action'
-import { TenantId } from '../../utils/decorators/target-tenant.decorator'
+import { TargetTenant } from '../../utils/decorators/target-tenant.decorator'
 
 const employeeRegisterBodySchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -23,7 +23,6 @@ const employeeRegisterBodySchema = z.object({
   department: z.string().min(1, 'Department is required'),
   jobTitle: z.string().min(1, 'Job title is required'),
   location: z.string().min(1, 'Location is required'),
-  tenantId: z.uuid().optional(),
 })
 
 type EmployeeRegisterBodyDTO = z.infer<typeof employeeRegisterBodySchema>
@@ -39,10 +38,10 @@ export class EmployeeRegisterController {
   @Post('/register')
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability) => ability.can(Action.Manage, 'User'))
+  @CheckPolicies((ability) => ability.can(Action.Create, 'User'))
   async handle(
     @Body(registerEmployeePipe) body: EmployeeRegisterBodyDTO,
-    @TenantId() tenantId: string,
+    @TargetTenant() tenantId: string,
   ) {
     const {
       firstName,

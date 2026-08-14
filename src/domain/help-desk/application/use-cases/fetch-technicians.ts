@@ -43,11 +43,15 @@ export class FetchTechniciansUseCase {
       effectiveStatus = 'ACTIVE'
     }
 
-    const { items, page, perPage, totalCount, totalPages, orderBy, order } =
-      await this.techniciansRepository.findMany(tenantId, {
+    const { items, meta } = await this.techniciansRepository.findMany(
+      tenantId,
+      {
         ...params,
         status: effectiveStatus,
-      })
+      },
+    )
+
+    const { page, perPage, totalCount, totalPages, orderBy, order } = meta
 
     return right({
       technicians: items,

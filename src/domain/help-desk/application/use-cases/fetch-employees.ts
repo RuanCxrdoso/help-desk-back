@@ -40,11 +40,12 @@ export class FetchEmployeesUseCase {
       effectiveStatus = 'ACTIVE'
     }
 
-    const { items, page, perPage, totalCount, totalPages, orderBy, order } =
-      await this.employeesRepository.findMany(tenantId, {
-        ...params,
-        status: effectiveStatus,
-      })
+    const { items, meta } = await this.employeesRepository.findMany(tenantId, {
+      ...params,
+      status: effectiveStatus,
+    })
+
+    const { page, perPage, totalCount, totalPages, orderBy, order } = meta
 
     return right({
       employees: items,

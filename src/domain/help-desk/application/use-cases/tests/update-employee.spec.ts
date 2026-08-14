@@ -4,16 +4,21 @@ import { UpdateEmployeeUseCase } from '../update-employee'
 import { makeEmployee } from 'test/factories/make-employee'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { NotFoundError } from '../../errors/not-found-error'
+import { FakeAuthorizationService } from 'test/services/authorization-service'
+import { ROLE } from '@/core/enums/role'
+import { NotAllowedError } from '../../errors/not-allowed-error'
 
+let authorizationService: FakeAuthorizationService
 let usersRepository: InMemoryUsersRepository
 let employeesRepository: InMemoryEmployeesRepository
 let sut: UpdateEmployeeUseCase
 
 describe('Update Employee', () => {
   beforeEach(() => {
+    authorizationService = new FakeAuthorizationService()
     usersRepository = new InMemoryUsersRepository()
     employeesRepository = new InMemoryEmployeesRepository(usersRepository)
-    sut = new UpdateEmployeeUseCase(employeesRepository)
+    sut = new UpdateEmployeeUseCase(employeesRepository, authorizationService)
 
     for (let i = 1; i <= 2; i++) {
       employeesRepository.items.push(
@@ -41,6 +46,11 @@ describe('Update Employee', () => {
       department: 'updated-department',
       jobTitle: 'updated-job-title',
       location: 'updated-location',
+      callerPayload: {
+        sub: 'user-id',
+        tenantId: 'tenant-id-1',
+        role: ROLE.ADMIN,
+      },
     })
 
     expect(result.isRight()).toBe(true)
@@ -66,6 +76,17 @@ describe('Update Employee', () => {
         }),
       )
     }
+
+    expect(authorizationService.authorizeSpy).toHaveBeenCalledWith(
+      {
+        sub: 'user-id',
+        tenantId: 'tenant-id-1',
+        role: ROLE.ADMIN,
+      },
+      'update',
+      'User',
+      expect.anything(),
+    )
   })
 
   it('should not be able to update a non-existent employee', async () => {
@@ -77,6 +98,11 @@ describe('Update Employee', () => {
       department: 'updated-department',
       jobTitle: 'updated-job-title',
       location: 'updated-location',
+      callerPayload: {
+        sub: 'user-id',
+        tenantId: 'tenant-id-3',
+        role: ROLE.ADMIN,
+      },
     })
 
     expect(result.isLeft()).toBe(true)
@@ -95,6 +121,11 @@ describe('Update Employee', () => {
       department: 'department-1',
       jobTitle: 'jobTitle-1',
       location: 'location-1',
+      callerPayload: {
+        sub: 'user-id',
+        tenantId: 'tenant-id-1',
+        role: ROLE.ADMIN,
+      },
     })
 
     expect(result.isRight()).toBe(true)
@@ -110,5 +141,37 @@ describe('Update Employee', () => {
         }),
       )
     }
+  })
+
+  it('should not be able to update an employee if not authorized', async () => {
+    authorizationService.mockAuthorization(false)
+
+    const result = await sut.execute({
+      id: 'id-1',
+      tenantId: 'tenant-id-1',
+      firstName: 'updated-first-name',
+      lastName: 'updated-last-name',
+      department: 'updated-department',
+      jobTitle: 'updated-job-title',
+      location: 'updated-location',
+      callerPayload: {
+        sub: 'user-id',
+        tenantId: 'tenant-id-1',
+        role: ROLE.ADMIN,
+      },
+    })
+
+    expect(result.isLeft()).toBe(true)
+
+    if (result.isLeft()) {
+      expect(result.value).toBeInstanceOf(NotAllowedError)
+    }
+
+    expect(employeesRepository.items[0]).toEqual(
+      expect.objectContaining({
+        firstName: 'Employee-1',
+        lastName: 'lastName-1',
+      }),
+    )
   })
 })

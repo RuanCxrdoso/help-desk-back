@@ -83,12 +83,7 @@ export class InMemoryTechniciansRepository implements ITechniciansRepository {
 
     return {
       items: paginatedItems,
-      page,
-      perPage,
-      totalCount,
-      totalPages,
-      orderBy,
-      order,
+      meta: { page, perPage, totalCount, totalPages, orderBy, order },
     }
   }
 

@@ -14,6 +14,8 @@ export class PrismaSuperAdminsRepository implements ISuperAdminsRepository {
     await this.prisma.superAdmin.create({
       data: superAdminPrisma,
     })
+
+    return
   }
 
   async findById(id: string): Promise<SuperAdmin | null> {

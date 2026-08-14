@@ -21,20 +21,47 @@ import { GetSuperAdminProfileUseCase } from '@/domain/help-desk/application/use-
 import { GetAdminProfileUseCase } from '@/domain/help-desk/application/use-cases/get-admin-profile'
 import { GetTechnicianProfileUseCase } from '@/domain/help-desk/application/use-cases/get-technician-profile'
 import { GetEmployeeProfileUseCase } from '@/domain/help-desk/application/use-cases/get-employee-profile'
+import { DeleteAdminUseCase } from '@/domain/help-desk/application/use-cases/delete-admin'
+import { DeleteAdminController } from './controllers/delete-users/delete-admin.controller'
+import { DeleteTechnicianUseCase } from '@/domain/help-desk/application/use-cases/delete-technician'
+import { DeleteEmployeeUseCase } from '@/domain/help-desk/application/use-cases/delete-employee'
+import { FetchAdminsUseCase } from '@/domain/help-desk/application/use-cases/fetch-admins'
+import { FetchEmployeesUseCase } from '@/domain/help-desk/application/use-cases/fetch-employees'
+import { FetchTechniciansController } from './controllers/fetch-users/fetch-technicians.controller'
+import { FetchTechniciansUseCase } from '@/domain/help-desk/application/use-cases/fetch-technicians'
+import { UpdateAdminUseCase } from '@/domain/help-desk/application/use-cases/update-admin'
+import { UpdateEmployeeUseCase } from '@/domain/help-desk/application/use-cases/update-employee'
+import { UpdateTechnicianUseCase } from '@/domain/help-desk/application/use-cases/update-technician'
+import { DeleteEmployeeController } from './controllers/delete-users/delete-employee.controller'
+import { DeleteTechnicianController } from './controllers/delete-users/delete-technician.controller'
+import { FetchAdminsController } from './controllers/fetch-users/fetch-admins.controller'
+import { FetchEmployeesController } from './controllers/fetch-users/fetch-employees.controller'
+import { UpdateAdminController } from './controllers/update-users/update-admin.controller'
+import { UpdateEmployeeController } from './controllers/update-users/update-employee.controller'
+import { UpdateTechnicianController } from './controllers/update-users/update-technician.controller'
 
 @Module({
   imports: [DatabaseModule, CryptographyModule, AuthModule],
   providers: [
     AuthenticateSuperAdminUseCase,
     AuthenticateUseCase,
-    RegisterTenantAndAdminUseCase,
-    RegisterAdminUseCase,
-    RegisterTechnicianUseCase,
-    RegisterEmployeeUseCase,
-    GetSuperAdminProfileUseCase,
+    DeleteAdminUseCase,
+    DeleteEmployeeUseCase,
+    DeleteTechnicianUseCase,
+    FetchAdminsUseCase,
+    FetchEmployeesUseCase,
+    FetchTechniciansUseCase,
     GetAdminProfileUseCase,
-    GetTechnicianProfileUseCase,
     GetEmployeeProfileUseCase,
+    GetSuperAdminProfileUseCase,
+    GetTechnicianProfileUseCase,
+    RegisterAdminUseCase,
+    RegisterEmployeeUseCase,
+    RegisterTechnicianUseCase,
+    RegisterTenantAndAdminUseCase,
+    UpdateAdminUseCase,
+    UpdateEmployeeUseCase,
+    UpdateTechnicianUseCase,
     {
       provide: APP_FILTER,
       useClass: DomainErrorFilter,
@@ -43,11 +70,20 @@ import { GetEmployeeProfileUseCase } from '@/domain/help-desk/application/use-ca
   controllers: [
     AuthenticateSuperAdminController,
     AuthenticateController,
-    TenantAndAdminRegisterController,
-    AdminRegisterController,
-    TechnicianRegisterController,
-    EmployeeRegisterController,
+    DeleteAdminController,
+    DeleteEmployeeController,
+    DeleteTechnicianController,
+    FetchAdminsController,
+    FetchEmployeesController,
+    FetchTechniciansController,
     GetProfileController,
+    AdminRegisterController,
+    EmployeeRegisterController,
+    TechnicianRegisterController,
+    TenantAndAdminRegisterController,
+    UpdateAdminController,
+    UpdateEmployeeController,
+    UpdateTechnicianController,
   ],
 })
 export class HttpModule {}
